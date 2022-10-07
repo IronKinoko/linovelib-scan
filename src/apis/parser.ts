@@ -34,15 +34,15 @@ export function parseCatalog(html: string) {
         const href = $dom.find('a').attr('href')
         if (!href) throw new Error(`${title} href 错误`)
 
-        try {
-          const id = href.match(/\/(?<id>\d+)\.html/)!.groups!.id
-          currentSection.chapters.push({
-            id,
-            title: $dom.text(),
-          })
-        } catch (error) {
-          console.log(href, title)
+        let id = ''
+        const matchRet = href.match(/\/(?<id>\d+)\.html/)
+        if (matchRet) {
+          id = matchRet.groups!.id
         }
+        currentSection.chapters.push({
+          id,
+          title: $dom.text(),
+        })
       }
     })
 

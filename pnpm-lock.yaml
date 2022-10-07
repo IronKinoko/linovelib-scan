@@ -1,6 +1,7 @@
 lockfileVersion: 5.4
 
 specifiers:
+  '@types/fs-extra': ^9.0.13
   axios: ^0.27.2
   cheerio: 1.0.0-rc.12
   esno: ^0.16.3
@@ -13,6 +14,9 @@ dependencies:
   esno: 0.16.3
   fs-extra: 10.1.0
   typescript: 4.8.4
+
+devDependencies:
+  '@types/fs-extra': 9.0.13
 
 packages:
 
@@ -54,6 +58,16 @@ packages:
     requiresBuild: true
     dev: false
     optional: true
+
+  /@types/fs-extra/9.0.13:
+    resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
+    dependencies:
+      '@types/node': 18.7.23
+    dev: true
+
+  /@types/node/18.7.23:
+    resolution: {integrity: sha512-DWNcCHolDq0ZKGizjx2DZjR/PqsYwAcYUJmfMWqtVU2MBMG5Mo+xFZrhGId5r/O5HOuMPyQEcM6KUBp5lBZZBg==}
+    dev: true
 
   /asynckit/0.4.0:
     resolution: {integrity: sha512-Oei9OH4tRh0YqU3GxhX79dM/mwVgvbZJaSNaRk+bshkj0S5cfHcgYakreBjrHwatXKbz+IoIdYLxrKim2MjW0Q==}
