@@ -1,13 +1,6 @@
 import { load } from 'cheerio'
+import { Section } from './types'
 
-export interface Section {
-  title: string
-  chapters: Chapter[]
-}
-export interface Chapter {
-  title: string
-  id: string
-}
 export function parseCatalog(html: string) {
   const $ = load(html)
 
@@ -29,15 +22,12 @@ export function parseCatalog(html: string) {
         }
         sections.push(currentSection)
       } else {
-        const title = $dom.text()
-
-        const href = $dom.find('a').attr('href')
-        if (!href) throw new Error(`${title} href 错误`)
+        const href = $dom.find('a').attr('href') || ''
 
         let id = ''
         const matchRet = href.match(/\/(?<id>\d+)\.html/)
         if (matchRet) {
-          id = matchRet.groups!.id
+          id = href
         }
         currentSection.chapters.push({
           id,
@@ -49,5 +39,52 @@ export function parseCatalog(html: string) {
   return {
     title,
     sections,
+  }
+}
+
+export function parseChapter(html: string) {
+  const $ = load(html)
+
+  const $content = $('#TextContent')
+  $content.remove('.tp').remove('.bd')
+
+  const content = ($content.html() || '')
+    .replace(new RegExp('“', 'gi'), '「')
+    .replace(new RegExp('”', 'gi'), '」')
+    .replace(new RegExp('‘', 'gi'), '『')
+    .replace(new RegExp('’', 'gi'), '』')
+
+  const $page = $('.mlfy_page')
+
+  let nextChapter = '',
+    prevChapter = '',
+    nextPage = '',
+    prevPage = ''
+
+  $page.find('a').each((i, e) => {
+    const $a = $(e)
+    const url = $a.attr('href')!
+    switch ($a.text()) {
+      case '上一页':
+        prevPage = url
+        break
+      case '上一章':
+        prevChapter = url
+        break
+      case '下一页':
+        nextPage = url
+        break
+      case '下一章':
+        nextChapter = url
+        break
+    }
+  })
+
+  return {
+    nextChapter,
+    prevChapter,
+    nextPage,
+    prevPage,
+    content,
   }
 }
