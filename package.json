@@ -2,12 +2,10 @@
   "name": "linovelib-scan",
   "version": "1.0.0",
   "description": "download linovelib as epub",
-  "main": "./dist/index.js",
   "scripts": {
     "dev": "nodemon -w src -e '*' -x esno src/cli.ts 3318",
-    "build": "tsup src/index.ts src/cli.ts --clean --splitting --dts"
+    "start": "esno src/cli.ts"
   },
-  "bin": "./dist/cli.js",
   "keywords": [],
   "author": "IronKinoko",
   "license": "MIT",
@@ -30,7 +28,6 @@
     "@types/mime-types": "^2.1.1",
     "@types/mustache": "^4.2.1",
     "@types/uuid": "^8.3.4",
-    "nodemon": "^2.0.20",
-    "tsup": "^6.2.3"
+    "nodemon": "^2.0.20"
   }
 }
