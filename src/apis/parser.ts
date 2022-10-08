@@ -1,11 +1,12 @@
 import { load } from 'cheerio'
-import { Section } from './types'
-
+import { Section } from '../types'
+import { v4 as uuid } from 'uuid'
+import { decrypt } from './decrypt'
 export function parseCatalog(html: string) {
   const $ = load(html)
 
   const title = $('.book-meta h1').text()
-
+  const author = $('.book-meta p a').text()
   const sections: Section[] = []
 
   let currentSection: Section
@@ -17,6 +18,7 @@ export function parseCatalog(html: string) {
 
       if ($dom.hasClass('volume')) {
         currentSection = {
+          id: uuid(),
           title: $dom.text(),
           chapters: [],
         }
@@ -38,6 +40,7 @@ export function parseCatalog(html: string) {
 
   return {
     title,
+    author,
     sections,
   }
 }
@@ -46,13 +49,10 @@ export function parseChapter(html: string) {
   const $ = load(html)
 
   const $content = $('#TextContent')
-  $content.remove('.tp').remove('.bd')
+  $content.find('.tp').remove()
+  $content.find('.bd').remove()
 
-  const content = ($content.html() || '')
-    .replace(new RegExp('“', 'gi'), '「')
-    .replace(new RegExp('”', 'gi'), '」')
-    .replace(new RegExp('‘', 'gi'), '『')
-    .replace(new RegExp('’', 'gi'), '』')
+  let content = decrypt($content.html() || '')
 
   const $page = $('.mlfy_page')
 

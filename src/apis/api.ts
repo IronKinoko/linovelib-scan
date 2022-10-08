@@ -1,6 +1,6 @@
 import Axios from 'axios'
 import { parseCatalog, parseChapter } from './parser'
-import { Section, SectionWithContent } from './types'
+import { Section, SectionWithContent } from '../types'
 import fs from 'fs-extra'
 import path from 'path'
 import pLimit from 'p-limit'
@@ -17,8 +17,8 @@ const axios = Axios.create({
     let filename = path.basename(filePath)
     filePath = filePath.replace(filename, encodeURIComponent(filename))
 
-    if (fs.existsSync(filePath)) {
-      const data = fs.readFileSync(filePath, 'utf-8')
+    if (await fs.pathExists(filePath)) {
+      const data = await fs.readFile(filePath, 'utf-8')
       return {
         config,
         data,
@@ -32,8 +32,8 @@ const axios = Axios.create({
     const res = await Axios(config)
 
     if (res.status === 200) {
-      fs.ensureDirSync(fileDir)
-      fs.writeFileSync(filePath, res.data, 'utf-8')
+      await fs.ensureDir(fileDir)
+      await fs.writeFile(filePath, res.data, 'utf-8')
     }
 
     return res
@@ -53,9 +53,11 @@ export async function queryChapter(chapterId: string) {
 }
 
 export async function querySection(section: Section): Promise<SectionWithContent> {
-  const chapters = section.chapters.map((chapter) => {
+  const chapters = section.chapters.map((chapter, idx) => {
     return {
       ...chapter,
+      order: idx + 1,
+      fileName: `chapter${`${idx + 1}`.padStart(4, '0')}.xhtml`,
       done: false,
       content: '',
       prevChapter: '',
@@ -95,7 +97,7 @@ export async function querySection(section: Section): Promise<SectionWithContent
   } while (chapters.some((chapter) => !chapter.done))
 
   return {
-    title: section.title,
+    ...section,
     chapters,
   }
 }
