@@ -1,6 +1,6 @@
 import { load } from 'cheerio'
 import { Section } from '../types.js'
-import { v4 as uuid } from 'uuid'
+import { md5 } from '../utils.js'
 import { decrypt } from './decrypt.js'
 export function parseCatalog(html: string) {
   const $ = load(html)
@@ -17,9 +17,11 @@ export function parseCatalog(html: string) {
       const $dom = $(dom)
 
       if ($dom.hasClass('volume')) {
+        const sectionTitle = `${title} ${$dom.text()}`
         currentSection = {
-          id: uuid(),
-          title: $dom.text(),
+          id: md5(sectionTitle),
+          title: sectionTitle,
+          author,
           chapters: [],
         }
         sections.push(currentSection)

@@ -1,6 +1,7 @@
 export interface Section {
   id: string
   title: string
+  author: string
   chapters: Chapter[]
 }
 export interface Chapter {
@@ -15,13 +16,9 @@ export interface ChapterWithCotnent extends Chapter {
   nextChapter: string
 }
 
-export interface SectionWithContent extends Section {
-  chapters: ChapterWithCotnent[]
-}
-
 export interface Book {
   id: string
   title: string
   author: string
-  section: SectionWithContent
+  chapters: ChapterWithCotnent[]
 }

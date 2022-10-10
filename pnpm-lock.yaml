@@ -5,11 +5,9 @@ specifiers:
   '@types/fs-extra': ^9.0.13
   '@types/mime-types': ^2.1.1
   '@types/mustache': ^4.2.1
-  '@types/uuid': ^8.3.4
   archiver: ^5.3.1
   axios: ^1.1.2
   cheerio: 1.0.0-rc.12
-  dayjs: ^1.11.5
   fs-extra: ^10.1.0
   mime-types: ^2.1.35
   mustache: ^4.2.0
@@ -17,25 +15,21 @@ specifiers:
   p-limit: ^4.0.0
   tsx: ^3.10.1
   typescript: ^4.8.4
-  uuid: ^9.0.0
 
 dependencies:
   archiver: 5.3.1
   axios: 1.1.2
   cheerio: 1.0.0-rc.12
-  dayjs: 1.11.5
   fs-extra: 10.1.0
   mime-types: 2.1.35
   mustache: 4.2.0
   p-limit: 4.0.0
-  uuid: 9.0.0
 
 devDependencies:
   '@types/archiver': 5.3.1
   '@types/fs-extra': 9.0.13
   '@types/mime-types': 2.1.1
   '@types/mustache': 4.2.1
-  '@types/uuid': 8.3.4
   nodemon: 2.0.20
   tsx: 3.10.1
   typescript: 4.8.4
@@ -114,10 +108,6 @@ packages:
 
   /@types/node/18.8.3:
     resolution: {integrity: sha512-0os9vz6BpGwxGe9LOhgP/ncvYN5Tx1fNcd2TM3rD/aCGBkysb+ZWpXEocG24h6ZzOi13+VB8HndAQFezsSOw1w==}
-    dev: true
-
-  /@types/uuid/8.3.4:
-    resolution: {integrity: sha512-c/I8ZRb51j+pYGAu5CrFMRxqZ2ke4y2grEBO5AUjgSkSk+qT2Ea+OdWElz/OiMf5MNpn2b17kuVBwZLQJXzihw==}
     dev: true
 
   /abbrev/1.1.1:
@@ -327,10 +317,6 @@ packages:
   /css-what/6.1.0:
     resolution: {integrity: sha512-HTUrgRJ7r4dsZKU6GjmpfRK1O76h97Z8MfS1G0FozR+oF2kG6Vfe8JE6zwrkbxigziPHinCJ+gCPjA9EaBDtRw==}
     engines: {node: '>= 6'}
-    dev: false
-
-  /dayjs/1.11.5:
-    resolution: {integrity: sha512-CAdX5Q3YW3Gclyo5Vpqkgpj8fSdLQcRuzfX6mC6Phy0nfJ0eGYOeS7m4mt2plDWLAtA4TqTakvbboHvUxfe4iA==}
     dev: false
 
   /debug/3.2.7_supports-color@5.5.0:
@@ -1029,11 +1015,6 @@ packages:
 
   /util-deprecate/1.0.2:
     resolution: {integrity: sha512-EPD5q1uXyFxJpCrLnCc1nHnq3gOa6DZBocAIiI2TaSCA7VCJ1UJDMagCzIkXNsUYfD1daK//LTEQ8xiIbrHtcw==}
-    dev: false
-
-  /uuid/9.0.0:
-    resolution: {integrity: sha512-MXcSTerfPa4uqyzStbRoTgt5XIe3x5+42+q1sDuy3R5MDk66URdLMOZe5aPX/SQd+kuYAh0FdP/pO28IkQyTeg==}
-    hasBin: true
     dev: false
 
   /wrappy/1.0.2:

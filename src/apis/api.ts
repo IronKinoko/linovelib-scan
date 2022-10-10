@@ -1,59 +1,56 @@
 import { default as Axios } from 'axios'
-import { parseCatalog, parseChapter } from './parser.js'
-import { Section, SectionWithContent } from '../types.js'
 import fs from 'fs-extra'
-import path from 'path'
 import pLimit from 'p-limit'
-/** @type {*} */
-const axios = Axios.create({
+import path from 'path'
+import { Book, Section } from '../types.js'
+import { parseCatalog, parseChapter } from './parser.js'
+
+export const axios = Axios.create({
   baseURL: 'https://www.linovelib.com',
-  adapter: async (config) => {
-    let filePath = path.join(process.cwd(), '.cache', config.url!)
-    const fileDir = path.dirname(filePath)
-    let filename = path.basename(filePath)
-    filePath = filePath.replace(filename, encodeURIComponent(filename))
-
-    if (await fs.pathExists(filePath)) {
-      const data = await fs.readFile(filePath, 'utf-8')
-      return {
-        config,
-        data,
-        headers: {},
-        status: 200,
-        statusText: '',
-      }
-    }
-
-    delete config.adapter
-    delete config.headers
-    config.headers = {
+  headers: {
+    common: {
       'User-Agent':
         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-    }
-    const res = await Axios(config)
-
-    if (res.status === 200) {
-      await fs.ensureDir(fileDir)
-      await fs.writeFile(filePath, res.data, 'utf-8')
-    }
-
-    return res
+    },
   },
 })
 
-export async function queryCatalog(bookId: string) {
-  const res = await axios.get(`/novel/${bookId}/catalog`)
+async function fetchHTML(url: string) {
+  let filePath = path.join(process.cwd(), '.cache', url)
+  const fileDir = path.dirname(filePath)
+  let filename = path.basename(filePath)
+  filePath = filePath.replace(filename, encodeURIComponent(filename))
 
-  return parseCatalog(res.data)
+  if (await fs.pathExists(filePath)) {
+    return await fs.readFile(filePath, 'utf-8')
+  }
+
+  const res = await axios.get(url)
+
+  if (res.status === 200) {
+    await fs.ensureDir(fileDir)
+    await fs.writeFile(filePath, res.data, 'utf-8')
+  }
+
+  return res.data
+}
+
+export async function queryCatalog(bookId: string) {
+  const res = await fetchHTML(`/novel/${bookId}/catalog`)
+
+  return {
+    id: bookId,
+    ...parseCatalog(res),
+  }
 }
 
 export async function queryChapter(chapterId: string) {
-  const res = await axios.get(chapterId)
+  const res = await fetchHTML(chapterId)
 
-  return parseChapter(res.data)
+  return parseChapter(res)
 }
 
-export async function querySection(section: Section): Promise<SectionWithContent> {
+export async function queryBook(section: Section): Promise<Book> {
   const chapters = section.chapters.map((chapter, idx) => {
     return {
       ...chapter,

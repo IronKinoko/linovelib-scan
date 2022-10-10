@@ -1,15 +1,14 @@
-import { Book } from '../types.js'
-import fs from 'fs-extra'
-import path from 'path'
-import mustache from 'mustache'
-import dayjs from 'dayjs'
 import archiver from 'archiver'
 import { load } from 'cheerio'
-import pLimit from 'p-limit'
-import crypto from 'crypto'
-import { default as axios } from 'axios'
+import fs from 'fs-extra'
 import mime from 'mime-types'
+import mustache from 'mustache'
+import pLimit from 'p-limit'
+import path from 'path'
 import url from 'url'
+import { axios } from '../apis/api.js'
+import { Book } from '../types.js'
+import { md5 } from '../utils.js'
 
 const limit = pLimit(5)
 async function downloadAssets(OEBPSRoot: string, book: Book) {
@@ -19,7 +18,7 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
   await fs.ensureDir(cacheRoot)
 
   const imageAssets = await Promise.all(
-    book.section.chapters.map(async (chapter) => {
+    book.chapters.map(async (chapter) => {
       const $ = load(chapter.content, null, false)
 
       const imageAssets = await Promise.all(
@@ -29,7 +28,7 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
             limit(async () => {
               const src = $(dom).attr('src')!
               const ext = src.split('?')[0].split('.').pop()
-              const id = crypto.createHash('md5').update(src).digest('hex')
+              const id = md5(src)
               const fileName = `${id}.${ext}`
               const localCachePath = path.resolve(cacheRoot, fileName)
               const filePath = path.resolve(imageRoot, fileName)
@@ -80,7 +79,6 @@ async function genOPF(OEBPSRoot: string, book: Book) {
   const cover = await genCover(OEBPSRoot, book)
   const xml = mustache.render(content, {
     ...book,
-    now: dayjs().format('YYYY-MM-DD'),
     cover,
     imageAssets,
   })
@@ -93,7 +91,7 @@ async function genCover(OEBPSRoot: string, book: Book) {
   let content = await fs.readFile(filePath, 'utf-8')
 
   let cover: string | undefined
-  for (const chapter of book.section.chapters) {
+  for (const chapter of book.chapters) {
     const $ = load(chapter.content)
     cover = $('img').attr('src')
     if (cover) break
@@ -111,7 +109,7 @@ async function genChapters(OEBPSRoot: string, book: Book) {
   await fs.remove(templatePath)
 
   await Promise.all(
-    book.section.chapters.map(async (chapter) => {
+    book.chapters.map(async (chapter) => {
       const chapterPath = path.resolve(OEBPSRoot, 'Text', chapter.fileName)
 
       const xml = mustache.render(tempalte, chapter)

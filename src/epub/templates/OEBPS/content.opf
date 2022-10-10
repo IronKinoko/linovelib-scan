@@ -5,26 +5,24 @@
     <dc:creator opf:role="aut">{{author}}</dc:creator>
     <dc:language>zh</dc:language>
     <dc:creator>IronKinoko</dc:creator>
-    <dc:identifier id="BookId" opf:scheme="UUID">urn:uuid:{{id}}</dc:identifier>
+    <dc:identifier id="BookId">{{id}}</dc:identifier>
     <meta name="cover" content="{{{cover}}}" />
-    <meta name="Sigil version" content="0.9.991" />
-    <dc:date opf:event="modification" xmlns:opf="http://www.idpf.org/2007/opf">{{now}}</dc:date>
   </metadata>
   <manifest>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
     <item id="cover.xhtml" href="Text/cover.xhtml" media-type="application/xhtml+xml" />
-    {{#section.chapters}}
+    {{#chapters}}
     <item id="{{fileName}}" href="Text/{{fileName}}" media-type="application/xhtml+xml" />
-    {{/section.chapters}}
+    {{/chapters}}
     {{#imageAssets}}
     <item id="{{{url}}}" href="Images/{{{url}}}" media-type="{{{type}}}" />
     {{/imageAssets}}
   </manifest>
   <spine toc="ncx">
     <itemref idref="cover.xhtml" />
-    {{#section.chapters}}
+    {{#chapters}}
     <itemref idref="{{fileName}}" />
-    {{/section.chapters}}
+    {{/chapters}}
   </spine>
   <guide>
     <reference type="cover" title="封面" href="Text/cover.xhtml"/>
