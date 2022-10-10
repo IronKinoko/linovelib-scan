@@ -34,8 +34,6 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
               const localCachePath = path.resolve(cacheRoot, fileName)
               const filePath = path.resolve(imageRoot, fileName)
 
-              console.log(src, fileName)
-
               $(dom).attr('src', `../Images/${fileName}`)
               if (!(await fs.pathExists(localCachePath))) {
                 const res = await axios.get(src, { responseType: 'arraybuffer' })

@@ -4,13 +4,9 @@ import { Section, SectionWithContent } from '../types.js'
 import fs from 'fs-extra'
 import path from 'path'
 import pLimit from 'p-limit'
-
+/** @type {*} */
 const axios = Axios.create({
   baseURL: 'https://www.linovelib.com',
-  headers: {
-    'User-Agent':
-      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-  },
   adapter: async (config) => {
     let filePath = path.join(process.cwd(), '.cache', config.url!)
     const fileDir = path.dirname(filePath)
@@ -29,6 +25,11 @@ const axios = Axios.create({
     }
 
     delete config.adapter
+    delete config.headers
+    config.headers = {
+      'User-Agent':
+        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
+    }
     const res = await Axios(config)
 
     if (res.status === 200) {
@@ -90,7 +91,6 @@ export async function querySection(section: Section): Promise<SectionWithContent
           } while (nextPageId)
 
           chapter.done = true
-          console.log(chapter.id, chapter.title)
         })
       )
     )
