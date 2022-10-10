@@ -8,7 +8,7 @@ import path from 'path'
 import url from 'url'
 import { axios } from '../apis/api.js'
 import { Book } from '../types.js'
-import { md5 } from '../utils.js'
+import { isURL, md5 } from '../utils.js'
 
 const limit = pLimit(5)
 async function downloadAssets(OEBPSRoot: string, book: Book) {
@@ -27,6 +27,7 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
           .map((dom) =>
             limit(async () => {
               const src = $(dom).attr('src')!
+              if (!isURL(src)) return ''
               const ext = src.split('?')[0].split('.').pop()
               const id = md5(src)
               const fileName = `${id}.${ext}`
@@ -53,7 +54,7 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
         .replace(new RegExp('‘', 'gi'), '『')
         .replace(new RegExp('’', 'gi'), '』')
 
-      return imageAssets
+      return imageAssets.filter(Boolean)
     })
   )
 

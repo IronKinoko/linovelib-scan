@@ -50,6 +50,62 @@ export async function queryChapter(chapterId: string) {
   return parseChapter(res)
 }
 
+function tryFixImg(content: string) {
+  const urlRe =
+    /src="(((ht|f)tps?):\/\/)?([^!@#$%^&*?.\s-]([^!@#$%^&*?.\s]{0,63}[^!@#$%^&*?.\s])?\.)+[a-z]{2,6}\/?"/
+
+  // /<img src="https:\/\/img\.linovelib\.com\/\d+\/\d+\/\d+\/\d+\.[a-z]+?">/
+  const correctCharArr = [
+    '<img src="https://img.linovelib.com/'.split(''),
+    /\d/,
+    '/',
+    /\d/,
+    '/',
+    /\d/,
+    '/',
+    /\d/,
+    '.',
+    /[a-z]/,
+    '">'.split(''),
+  ].flat()
+
+  const res = content.match(/<img(.*?)>/g)
+  if (res) {
+    for (const imgHTML of res) {
+      if (urlRe.test(imgHTML)) continue
+
+      let start = content.indexOf(imgHTML)
+
+      let result = '',
+        end = start,
+        correctIdx = 0
+      for (let stack = ''; end < content.length && correctIdx < correctCharArr.length; end++) {
+        const char = content.charAt(end)
+        const target = correctCharArr[correctIdx]
+        if (typeof target === 'string') {
+          if (target === char) {
+            result += char
+            correctIdx++
+          }
+        } else {
+          if (target.test(char)) {
+            stack += char
+          } else {
+            result += stack
+            stack = ''
+            correctIdx++
+            end--
+          }
+        }
+      }
+      if (correctIdx === correctCharArr.length) {
+        content = content.replace(content.slice(start, end), result)
+      }
+    }
+  }
+
+  return content
+}
 export async function queryBook(section: Section): Promise<Book> {
   const chapters = section.chapters.map((chapter, idx) => {
     return {
@@ -86,6 +142,8 @@ export async function queryBook(section: Section): Promise<Book> {
             chapter.prevChapter ||= chapterInfo.prevChapter
             chapter.nextChapter ||= chapterInfo.nextChapter
           } while (nextPageId)
+
+          chapter.content = tryFixImg(chapter.content)
 
           chapter.done = true
         })

@@ -1,6 +1,7 @@
 export interface Section {
   id: string
   title: string
+  sectionName: string
   author: string
   chapters: Chapter[]
 }

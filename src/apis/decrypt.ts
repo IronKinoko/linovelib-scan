@@ -1,5 +1,5 @@
 // @ts-nocheck
-export function decrypt(k) {
+export function decrypt(k: string): string {
   return eval(
     (function (p, a, c, k, e, d) {
       e = function (c) {

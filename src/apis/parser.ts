@@ -21,6 +21,7 @@ export function parseCatalog(html: string) {
         currentSection = {
           id: md5(sectionTitle),
           title: sectionTitle,
+          sectionName: $dom.text(),
           author,
           chapters: [],
         }
@@ -54,7 +55,7 @@ export function parseChapter(html: string) {
   $content.find('.tp').remove()
   $content.find('.bd').remove()
 
-  let content = decrypt($content.html() || '')
+  let content = decrypt($content.html() || '').trim().replace(/[\r\n]/gim, '')
 
   const $page = $('.mlfy_page')
 
