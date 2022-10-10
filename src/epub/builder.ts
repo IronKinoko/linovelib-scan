@@ -1,4 +1,4 @@
-import { Book } from '../types'
+import { Book } from '../types.js'
 import fs from 'fs-extra'
 import path from 'path'
 import mustache from 'mustache'
@@ -7,8 +7,9 @@ import archiver from 'archiver'
 import { load } from 'cheerio'
 import pLimit from 'p-limit'
 import crypto from 'crypto'
-import axios from 'axios'
+import { default as axios } from 'axios'
 import mime from 'mime-types'
+import url from 'url'
 
 const limit = pLimit(5)
 async function downloadAssets(OEBPSRoot: string, book: Book) {
@@ -134,7 +135,7 @@ async function epub(bookRoot: string) {
 
 export async function genBook(book: Book) {
   const bookRoot = path.resolve(process.cwd(), 'epubs', book.title)
-  const templateRoot = path.resolve(__dirname, 'templates')
+  const templateRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), 'templates')
 
   await fs.ensureDir(bookRoot)
   await fs.emptyDir(bookRoot)

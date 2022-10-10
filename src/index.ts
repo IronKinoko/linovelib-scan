@@ -1,12 +1,13 @@
-import { queryCatalog, querySection } from './apis/api'
+import { queryCatalog, querySection } from './apis/api.js'
 import pLimit from 'p-limit'
-import { genBook } from './epub/builder'
+import { genBook } from './epub/builder.js'
 const limit = pLimit(3)
 
 process.on('unhandledRejection', (e: any) => {
   console.error(e)
 })
 
+export * from './apis/api.js'
 export async function downLoadEpub(bookId: string) {
   const catalog = await queryCatalog(bookId)
 

@@ -4,16 +4,10 @@
 
 ## 使用
 
-先安装依赖
-
-```shell
-pnpm i
-```
-
 获取 `bookId`
 
 `https://www.linovelib.com/novel/3318/catalog` 其中 `3318` 就是 `bookId`
 
 ```
-pnpm start -- 3318
+npx @ironkinoko/linovelib-scan 3318
 ```

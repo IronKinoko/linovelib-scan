@@ -1,6 +1,6 @@
-/.vscode
-/node_modules
-/.cache
-/dist
+.vscode
+node_modules
+.cache
+dist
 .DS_Store
-/epubs
+epubs

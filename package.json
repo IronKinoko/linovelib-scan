@@ -1,25 +1,46 @@
 {
-  "name": "linovelib-scan",
-  "version": "1.0.0",
+  "name": "@ironkinoko/linovelib-scan",
+  "version": "1.0.1",
   "description": "download linovelib as epub",
   "scripts": {
-    "dev": "nodemon -w src -e '*' -x esno src/cli.ts 3318",
-    "start": "esno src/cli.ts"
+    "dev": "nodemon -w src -e '*' -x tsx src/cli.ts 3318",
+    "build": "rm -rf dist && tsc && cp -r src/epub/templates dist/epub/templates",
+    "release": "npm run build && npm publish"
   },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "bin": {
+    "linovelib-scan": "dist/cli.js"
+  },
+  "type": "module",
+  "files": [
+    "dist"
+  ],
+  "publishConfig": {
+    "registry": "https://registry.npmjs.org/",
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/IronKinoko/linovelib-scan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/IronKinoko/linovelib-scan/issues"
+  },
+  "homepage": "https://github.com/IronKinoko/linovelib-scan#readme",
   "keywords": [],
-  "author": "IronKinoko",
+  "author": "IronKinoko <kinoko_main@outlook.com>",
   "license": "MIT",
   "dependencies": {
     "archiver": "^5.3.1",
-    "axios": "^0.27.2",
+    "axios": "^1.1.2",
     "cheerio": "1.0.0-rc.12",
     "dayjs": "^1.11.5",
-    "esno": "^0.16.3",
     "fs-extra": "^10.1.0",
     "mime-types": "^2.1.35",
     "mustache": "^4.2.0",
     "p-limit": "^4.0.0",
-    "typescript": "^4.8.4",
     "uuid": "^9.0.0"
   },
   "devDependencies": {
@@ -28,6 +49,8 @@
     "@types/mime-types": "^2.1.1",
     "@types/mustache": "^4.2.1",
     "@types/uuid": "^8.3.4",
-    "nodemon": "^2.0.20"
+    "nodemon": "^2.0.20",
+    "tsx": "^3.10.1",
+    "typescript": "^4.8.4"
   }
 }

@@ -1,6 +1,6 @@
-#!/usr/bin/env esno
+#!/usr/bin/env node
 
-import { downLoadEpub } from '.'
+import { downLoadEpub } from './index.js'
 
 const bookId = process.argv[2]
 if (!bookId) throw new Error('请输入 bookId')

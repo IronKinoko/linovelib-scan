@@ -1,7 +1,7 @@
 import { load } from 'cheerio'
-import { Section } from '../types'
+import { Section } from '../types.js'
 import { v4 as uuid } from 'uuid'
-import { decrypt } from './decrypt'
+import { decrypt } from './decrypt.js'
 export function parseCatalog(html: string) {
   const $ = load(html)
 
