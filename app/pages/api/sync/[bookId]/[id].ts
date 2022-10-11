@@ -45,6 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     res.json({ code: 0, done: false })
   } catch (error) {
+    console.error(error)
     res.send({ code: 1, message: error.message })
   }
 }
