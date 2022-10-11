@@ -1,9 +1,11 @@
 import type { NextPage } from 'next'
+import { useRouter } from 'next/router'
 import { useState } from 'react'
 import Catalog from '../components/Catalog'
 const Home: NextPage = () => {
-  const [bookId, setBookId] = useState('')
+  const router = useRouter()
 
+  const bookId = router.query.bookId as string
   return (
     <div>
       <div className="p-4">
@@ -13,8 +15,9 @@ const Home: NextPage = () => {
             spellCheck="false"
             placeholder="输入 bookId 搜索"
             type="search"
+            defaultValue={bookId}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') setBookId(e.currentTarget.value)
+              if (e.key === 'Enter') router.replace({ query: { bookId: e.currentTarget.value } })
             }}
           />
           <div className="hidden sm:flex absolute inset-y-0 right-0 py-1.5 pr-1.5 select-none pointer-events-none">
