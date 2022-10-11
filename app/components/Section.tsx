@@ -35,8 +35,8 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
 
   return (
     <section className="relative">
-      <div className="border-b px-4 py-4 sticky -top-1 bg-gray-100">
-        <div className="flex justify-between items-center" onClick={handleSwitch}>
+      <div className="border-b px-4 py-4 sticky -top-1 bg-gray-100 cursor-pointer" onClick={handleSwitch}>
+        <div className="flex justify-between items-center">
           <div>{section.sectionName}</div>
           <div className="shrink-0 ml-4 flex items-center space-x-2">
             <button className="btn disabled:opacity-50" disabled={loading} onClick={handleSync}>

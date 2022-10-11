@@ -15,7 +15,8 @@ function MyApp({ Component, pageProps }: AppProps) {
 
       <SWRConfig
         value={{
-          fetcher: (resource) => axios.get(resource).then((res) => res.data),
+          fetcher: (resource) =>
+            axios.get(resource, { baseURL: process.env.basePath }).then((res) => res.data),
         }}
       >
         <Component {...pageProps} />
