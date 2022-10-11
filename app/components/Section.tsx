@@ -19,14 +19,14 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
     if (loading) return
     ;(async function fn() {
       setLoading(true)
-      const res: SyncResult = await axios.get(`/api/sync/${key}`).then((res) => res.data)
+      const res: SyncResult = await axios.get(`/api/catalog/${key}/sync`).then((res) => res.data)
       if (res.code !== 0) {
         setErrorMessage(res.message)
         setLoading(false)
       } else {
         if (res.done) {
           setLoading(false)
-          const res = await axios.get(`/api/download/${key}`, { responseType: 'blob' })
+          const res = await axios.get(`/api/catalog/${key}/download`, { responseType: 'blob' })
           const fileName = decodeURIComponent(res.headers['content-disposition']?.split('=').pop()!)
           const blob = new Blob([res.data], { type: 'application/epub+zip' })
           saveAs(blob, fileName)

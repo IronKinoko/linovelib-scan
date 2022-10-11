@@ -20,9 +20,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       )
       fs.createReadStream(epubPath).pipe(res)
     } else {
-      res.redirect('/404')
+      res.redirect(`${process.env.basePath}/404`)
     }
   } catch (error) {
-    res.redirect('/404')
+    console.error(error)
+    res.redirect(`${process.env.basePath}/404`)
   }
 }

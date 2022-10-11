@@ -7,7 +7,7 @@ const nextConfig = {
   reactStrictMode: true,
   swcMinify: true,
   basePath: basePath,
-  env: { basePath },
+  env: { basePath: basePath || '' },
 }
 
 module.exports = nextConfig
