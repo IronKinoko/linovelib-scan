@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app'
 import Head from 'next/head'
 import { SWRConfig } from 'swr'
 import axios from 'axios'
+axios.defaults.baseURL = process.env.basePath
 
 function MyApp({ Component, pageProps }: AppProps) {
   return (
@@ -15,8 +16,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
       <SWRConfig
         value={{
-          fetcher: (resource) =>
-            axios.get(resource, { baseURL: process.env.basePath }).then((res) => res.data),
+          fetcher: (resource) => axios.get(resource).then((res) => res.data),
         }}
       >
         <Component {...pageProps} />

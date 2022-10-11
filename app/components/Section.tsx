@@ -25,7 +25,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
       } else {
         if (res.done) {
           setLoading(false)
-          window.open(`/api/download/${key}`)
+          window.open(`${process.env.basePath}/api/download/${key}`)
         } else {
           setTimeout(fn, 500)
         }
