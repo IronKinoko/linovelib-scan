@@ -2,7 +2,7 @@ import { default as Axios } from 'axios'
 import fs from 'fs-extra'
 import pLimit from 'p-limit'
 import path from 'path'
-import { Book, Section } from '../types.js'
+import { Book, Catalog, Section } from '../types.js'
 import { parseCatalog, parseChapter } from './parser.js'
 
 export const axios = Axios.create({
@@ -35,7 +35,7 @@ async function fetchHTML(url: string) {
   return res.data
 }
 
-export async function queryCatalog(bookId: string) {
+export async function queryCatalog(bookId: string): Promise<Catalog> {
   const res = await fetchHTML(`/novel/${bookId}/catalog`)
 
   return {

@@ -4,6 +4,7 @@ import { genEpub } from './epub/builder.js'
 const limit = pLimit(3)
 
 export { genEpub, queryBook, queryCatalog, queryChapter }
+export * from './types.js'
 export async function downLoadEpub(bookId: string, sectionNames?: string[]) {
   const catalog = await queryCatalog(bookId)
 

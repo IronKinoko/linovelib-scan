@@ -1,3 +1,10 @@
+export interface Catalog {
+  id: string
+  title: string
+  author: string
+  sections: Section[]
+}
+
 export interface Section {
   id: string
   title: string
