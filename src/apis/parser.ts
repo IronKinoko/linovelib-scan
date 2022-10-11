@@ -23,7 +23,7 @@ export function parseCatalog(html: string) {
       if ($dom.hasClass('volume')) {
         const sectionTitle = `${title} ${$dom.text()}`
         currentSection = {
-          id: md5(sectionTitle),
+          id: md5(sectionTitle + i),
           title: sectionTitle,
           sectionName: $dom.text(),
           author,
