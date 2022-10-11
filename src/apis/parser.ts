@@ -5,6 +5,10 @@ import { decrypt } from './decrypt.js'
 export function parseCatalog(html: string) {
   const $ = load(html)
 
+  if ($('.book-meta').length === 0) {
+    throw new Error($('.comlogin').text())
+  }
+
   const title = $('.book-meta h1').text()
   const author = $('.book-meta p a').text()
   const sections: Section[] = []
@@ -55,7 +59,9 @@ export function parseChapter(html: string) {
   $content.find('.tp').remove()
   $content.find('.bd').remove()
 
-  let content = decrypt($content.html() || '').trim().replace(/[\r\n]/gim, '')
+  let content = decrypt($content.html() || '')
+    .trim()
+    .replace(/[\r\n]/gim, '')
 
   const $page = $('.mlfy_page')
 

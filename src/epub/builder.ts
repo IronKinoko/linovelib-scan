@@ -130,7 +130,7 @@ async function epub(bookRoot: string) {
   await fs.remove(bookRoot)
 }
 
-export async function genBook(book: Book) {
+export async function genEpub(book: Book) {
   const bookRoot = path.resolve(process.cwd(), 'epubs', book.title)
   const templateRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), 'templates')
 
