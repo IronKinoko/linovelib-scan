@@ -1,6 +1,7 @@
 import React, { FC, useState } from 'react'
 import type { Section as ISection } from '@ironkinoko/linovelib-scan'
 import axios from 'axios'
+import { saveAs } from 'file-saver'
 
 type SyncResult = { code: number; message: string; done: boolean }
 
@@ -25,7 +26,10 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
       } else {
         if (res.done) {
           setLoading(false)
-          window.open(`${process.env.basePath}/api/download/${key}`)
+          const res = await axios.get(`/api/download/${key}`, { responseType: 'blob' })
+          const fileName = decodeURIComponent(res.headers['content-disposition']?.split('=').pop()!)
+          const blob = new Blob([res.data], { type: 'application/epub+zip' })
+          saveAs(blob, fileName)
         } else {
           setTimeout(fn, 500)
         }
@@ -35,7 +39,10 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
 
   return (
     <section className="relative">
-      <div className="border-b px-4 py-4 sticky -top-1 bg-gray-100 cursor-pointer" onClick={handleSwitch}>
+      <div
+        className="border-b px-4 py-4 sticky -top-1 bg-gray-100 cursor-pointer"
+        onClick={handleSwitch}
+      >
         <div className="flex justify-between items-center">
           <div>{section.sectionName}</div>
           <div className="shrink-0 ml-4 flex items-center space-x-2">

@@ -1,6 +1,5 @@
 import type { NextPage } from 'next'
 import { useRouter } from 'next/router'
-import { useState } from 'react'
 import Catalog from '../components/Catalog'
 const Home: NextPage = () => {
   const router = useRouter()
@@ -16,6 +15,7 @@ const Home: NextPage = () => {
             placeholder="输入 bookId 搜索"
             type="search"
             defaultValue={bookId}
+            enterKeyHint="search"
             onKeyDown={(e) => {
               if (e.key === 'Enter') router.replace({ query: { bookId: e.currentTarget.value } })
             }}
