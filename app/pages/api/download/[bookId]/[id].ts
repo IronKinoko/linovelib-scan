@@ -1,6 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { queryBook, queryCatalog } from '@ironkinoko/linovelib-scan'
-import { cache } from '../../../../utils/cache'
+import { queryCatalog } from '@ironkinoko/linovelib-scan'
 import path from 'path'
 import fs from 'fs-extra'
 

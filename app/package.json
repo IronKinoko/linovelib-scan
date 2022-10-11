@@ -9,7 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@ironkinoko/linovelib-scan": "^1.0.4",
+    "@ironkinoko/linovelib-scan": "^1.0.5",
     "axios": "^1.1.2",
     "fs-extra": "^10.1.0",
     "next": "12.3.1",

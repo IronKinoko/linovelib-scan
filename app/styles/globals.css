@@ -3,7 +3,7 @@
 @tailwind utilities;
 
 body {
-  background: #f1f1f1;
+  @apply bg-gray-100;
 }
 @layer base {
   a {
@@ -13,6 +13,6 @@ body {
 
 @layer components {
   .btn {
-    @apply text-sm leading-5 font-medium text-sky-600 dark:text-sky-400 bg-sky-400/10 rounded py-1 px-3 flex items-center hover:bg-sky-400/20
+    @apply text-sm leading-5 font-medium text-sky-600 dark:text-sky-400 bg-sky-400/10 rounded py-1 px-3 flex items-center hover:bg-sky-400/20;
   }
 }

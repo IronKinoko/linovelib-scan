@@ -1,11 +1,11 @@
 import React, { FC } from 'react'
 import useSWR from 'swr'
-import type { queryCatalog } from '@ironkinoko/linovelib-scan'
+import type { Catalog as ICatalog } from '@ironkinoko/linovelib-scan'
 import Section from './Section'
 type CatalogRes = {
   code: number
   message?: string
-  catalog: Awaited<ReturnType<typeof queryCatalog>>
+  catalog: ICatalog
 }
 
 const Catalog: FC<{ bookId: string }> = ({ bookId }) => {
@@ -31,10 +31,12 @@ const Catalog: FC<{ bookId: string }> = ({ bookId }) => {
           {catalog.title}
         </a>
 
-        <span className="hidden sm:inline-block sm:mx-2">|</span>
-
+        <span className="block sm:inline-block">
+          <span className="hidden sm:inline-block sm:mx-2">|</span>
+        </span>
+        
         <a
-          className="block mt-1 sm:mt-0 sm:inline-block text-sm sm:text-base"
+          className="mt-1 sm:mt-0 text-sm sm:text-base"
           href={`https://www.linovelib.com/authorarticle/${catalog.author}.html`}
           target="_blank"
           rel="noopener noreferrer"
