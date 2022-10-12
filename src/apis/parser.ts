@@ -1,49 +1,46 @@
 import { load } from 'cheerio'
 import { Section } from '../types.js'
 import { md5 } from '../utils.js'
-import { decrypt } from './decrypt.js'
 export function parseCatalog(html: string) {
   const $ = load(html)
 
-  if ($('.book-meta').length === 0) {
-    throw new Error($('.comlogin').text())
+  if ($('#volumes').length === 0) {
+    throw new Error($('.aui-ver-form').text())
   }
 
-  const title = $('.book-meta h1').text()
-  const author = $('.book-meta p a').text()
+  const title = $('[property=og:novel:book_name]').attr('content') || ''
+  const author = $('[property=og:novel:author]').attr('content') || ''
   const sections: Section[] = []
 
   let currentSection: Section
 
-  $('.chapter-list')
-    .children()
-    .each((i, dom) => {
-      const $dom = $(dom)
+  $('#volumes li').each((i, dom) => {
+    const $dom = $(dom)
 
-      if ($dom.hasClass('volume')) {
-        const sectionTitle = `${title} ${$dom.text()}`
-        currentSection = {
-          id: md5(sectionTitle + i),
-          title: sectionTitle,
-          sectionName: $dom.text(),
-          author,
-          chapters: [],
-        }
-        sections.push(currentSection)
-      } else {
-        const href = $dom.find('a').attr('href') || ''
-
-        let id = ''
-        const matchRet = href.match(/\/(?<id>\d+)\.html/)
-        if (matchRet) {
-          id = href
-        }
-        currentSection.chapters.push({
-          id,
-          title: $dom.text(),
-        })
+    if ($dom.hasClass('chapter-bar')) {
+      const sectionTitle = `${title} ${$dom.text()}`
+      currentSection = {
+        id: md5(sectionTitle + i),
+        title: sectionTitle,
+        sectionName: $dom.text(),
+        author,
+        chapters: [],
       }
-    })
+      sections.push(currentSection)
+    } else {
+      const href = $dom.find('a').attr('href') || ''
+
+      let id = ''
+      const matchRet = href.match(/\/(?<id>\d+)\.html/)
+      if (matchRet) {
+        id = href
+      }
+      currentSection.chapters.push({
+        id,
+        title: $dom.text(),
+      })
+    }
+  })
 
   return {
     title,
@@ -55,36 +52,35 @@ export function parseCatalog(html: string) {
 export function parseChapter(html: string) {
   const $ = load(html)
 
-  const $content = $('#TextContent')
-  $content.find('.tp').remove()
-  $content.find('.bd').remove()
+  const $content = $('#acontent')
+  $content.find('.cgo').remove()
 
-  let content = decrypt($content.html() || '')
-    .trim()
-    .replace(/[\r\n]/gim, '')
+  let content = ($content.html() || '').trim().replace(/[\r\n]/gim, '')
 
-  const $page = $('.mlfy_page')
+  const $page = $('#footlink')
 
   let nextChapter = '',
     prevChapter = '',
     nextPage = '',
     prevPage = ''
 
+  const pre = html.match(/url_previous:'(.*?)'/)?.[1] ||''
+  const next = html.match(/url_next:'(.*?)'/)?.[1] ||''
+  
   $page.find('a').each((i, e) => {
     const $a = $(e)
-    const url = $a.attr('href')!
     switch ($a.text()) {
       case '上一页':
-        prevPage = url
+        prevPage = pre
         break
       case '上一章':
-        prevChapter = url
+        prevChapter = pre
         break
       case '下一页':
-        nextPage = url
+        nextPage = next
         break
       case '下一章':
-        nextChapter = url
+        nextChapter = next
         break
     }
   })

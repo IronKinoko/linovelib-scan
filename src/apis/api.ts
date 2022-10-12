@@ -6,7 +6,7 @@ import { Book, Catalog, Section } from '../types.js'
 import { parseCatalog, parseChapter } from './parser.js'
 
 export const axios = Axios.create({
-  baseURL: 'https://www.linovelib.com',
+  baseURL: 'https://w.linovelib.com',
   headers: {
     common: {
       'User-Agent':
