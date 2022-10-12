@@ -75,7 +75,7 @@ function tryFixImg(content: string) {
       if (urlRe.test(imgHTML)) continue
 
       let start = content.indexOf(imgHTML)
-
+      console.log(imgHTML)
       let result = '',
         end = start,
         correctIdx = 0

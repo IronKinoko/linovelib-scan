@@ -1,4 +1,5 @@
 import archiver from 'archiver'
+import { default as Axios } from 'axios'
 import { load } from 'cheerio'
 import fs from 'fs-extra'
 import mime from 'mime-types'
@@ -35,12 +36,17 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
               const filePath = path.resolve(imageRoot, fileName)
 
               $(dom).attr('src', `../Images/${fileName}`)
-              if (!(await fs.pathExists(localCachePath))) {
-                const res = await axios.get(src, { responseType: 'arraybuffer' })
-                await fs.writeFile(localCachePath, res.data)
-              }
+              try {
+                if (!(await fs.pathExists(localCachePath))) {
+                  const res = await axios.get(src, { responseType: 'arraybuffer' })
+                  await fs.writeFile(localCachePath, res.data)
+                }
 
-              await fs.copy(localCachePath, filePath)
+                await fs.copy(localCachePath, filePath)
+              } catch (error) {
+                Axios.isAxiosError(error) && console.error(error.toJSON())
+                console.error(src, 'download error')
+              }
 
               return fileName
             })
