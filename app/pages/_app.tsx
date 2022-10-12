@@ -17,6 +17,7 @@ function MyApp({ Component, pageProps }: AppProps) {
 
       <SWRConfig
         value={{
+          revalidateOnFocus: false,
           fetcher: (resource) => axios.get(resource).then((res) => res.data),
         }}
       >
