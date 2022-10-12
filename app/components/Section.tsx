@@ -40,11 +40,11 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   return (
     <section className="relative">
       <div
-        className="border-b px-4 py-4 sticky -top-1 bg-gray-100 cursor-pointer"
+        className="border-b px-4 py-4 sticky -top-1 bg-gray-100 dark:bg-slate-900 cursor-pointer dark:border-slate-700"
         onClick={handleSwitch}
       >
         <div className="flex justify-between items-center">
-          <div>{section.sectionName}</div>
+          <div className="text-slate-900 dark:text-slate-200">{section.sectionName}</div>
           <div className="shrink-0 ml-4 flex items-center space-x-2">
             <button className="btn disabled:opacity-50" disabled={loading} onClick={handleSync}>
               {loading ? '下载中...' : '下载'}
@@ -53,9 +53,9 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
         </div>
         {errorMessage && <div className="mt-2 text-sm text-red-500">{errorMessage}</div>}
       </div>
-      <div className="text-sm bg-slate-50" hidden={!open}>
+      <div className="text-sm bg-slate-50 dark:bg-slate-800" hidden={!open}>
         {section.chapters.map((chapter, idx) => (
-          <div key={idx} className="border-b px-4 py-3">
+          <div key={idx} className="border-b px-4 py-3 dark:border-slate-700">
             {chapter.title}
           </div>
         ))}

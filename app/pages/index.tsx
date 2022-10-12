@@ -10,7 +10,7 @@ const Home: NextPage = () => {
       <div className="p-4">
         <div className="md:w-64 relative flex items-center">
           <input
-            className="block w-full text-sm px-3 py-2 bg-gray-800 bg-opacity-5 leading-tight rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-gray-200 focus:bg-white hover:bg-opacity-10 transition-colors"
+            className="block w-full text-sm px-3 py-2 bg-gray-800 bg-opacity-5 leading-tight rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-gray-200 focus:bg-white hover:bg-opacity-10 transition-colors dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700"
             spellCheck="false"
             placeholder="输入 bookId 搜索"
             type="search"
