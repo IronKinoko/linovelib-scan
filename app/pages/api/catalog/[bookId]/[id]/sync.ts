@@ -29,14 +29,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     } else {
       cache.set(id, { code: 0 })
       queryBook(section)
-        .then((book) => {
-          genEpub(book)
-            .then(() => {
-              cache.del(id)
-            })
-            .catch((error) => {
-              cache.set(id, { code: 1, message: error.message })
-            })
+        .then(genEpub)
+        .then(() => {
+          cache.del(id)
         })
         .catch((error) => {
           cache.set(id, { code: 1, message: error.message })
