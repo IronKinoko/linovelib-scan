@@ -3,7 +3,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 it('should gen epub and use cache', async () => {
-  await fs.remove(path.resolve(process.cwd(), '.cache'))
+  // await fs.remove(path.resolve(process.cwd(), '.cache'))
 
   {
     const catalog = await downLoadEpub('2923', ['第三卷'])

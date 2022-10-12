@@ -55,7 +55,9 @@ export function parseChapter(html: string) {
   const $content = $('#acontent')
   $content.find('.cgo').remove()
 
-  let content = ($content.html() || '').trim().replace(/[\r\n]/gim, '')
+  let content = ($content.html() || '')
+    .trim()
+    .replace(/[\r\n]/gim, '')
 
   const $page = $('#footlink')
 
@@ -64,9 +66,9 @@ export function parseChapter(html: string) {
     nextPage = '',
     prevPage = ''
 
-  const pre = html.match(/url_previous:'(.*?)'/)?.[1] ||''
-  const next = html.match(/url_next:'(.*?)'/)?.[1] ||''
-  
+  const pre = html.match(/url_previous:'(.*?)'/)?.[1] || ''
+  const next = html.match(/url_next:'(.*?)'/)?.[1] || ''
+
   $page.find('a').each((i, e) => {
     const $a = $(e)
     switch ($a.text()) {

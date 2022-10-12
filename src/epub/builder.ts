@@ -28,7 +28,10 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
           .map((dom) =>
             limit(async () => {
               const src = $(dom).attr('src')!
-              if (!isURL(src)) return ''
+              if (!isURL(src)) {
+                $(dom).remove()
+                return ''
+              }
               const ext = src.split('?')[0].split('.').pop()
               const id = md5(src)
               const fileName = `${id}.${ext}`
@@ -44,8 +47,9 @@ async function downloadAssets(OEBPSRoot: string, book: Book) {
 
                 await fs.copy(localCachePath, filePath)
               } catch (error) {
-                Axios.isAxiosError(error) && console.error(error.toJSON())
+                Axios.isAxiosError(error) && console.error(error.code, error.message)
                 console.error(src, 'download error')
+                $(dom).remove()
               }
 
               return fileName
@@ -133,7 +137,7 @@ async function epub(bookRoot: string) {
   archive.directory(bookRoot, false)
   await archive.finalize()
 
-  await fs.remove(bookRoot)
+  // await fs.remove(bookRoot)
 }
 
 export async function genEpub(book: Book) {
