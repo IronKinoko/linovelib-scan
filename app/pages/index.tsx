@@ -16,6 +16,7 @@ const Home: NextPage = () => {
             type="search"
             defaultValue={bookId}
             enterKeyHint="search"
+            autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') router.replace({ query: { bookId: e.currentTarget.value } })
             }}
