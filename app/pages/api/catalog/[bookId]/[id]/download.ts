@@ -1,7 +1,6 @@
-import type { NextApiRequest, NextApiResponse } from 'next'
 import { queryCatalog } from '@ironkinoko/linovelib-scan'
-import path from 'path'
-import fs from 'fs-extra'
+import type { NextApiRequest, NextApiResponse } from 'next'
+import { downloadLocalEpubFile } from 'pages/api/downloadBySectionName'
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -12,16 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!section) throw new Error('Invalid section id')
 
-    const epubPath = path.resolve(process.cwd(), 'epubs', section.title + '.epub')
-    if (await fs.pathExists(epubPath)) {
-      res.setHeader(
-        'Content-Disposition',
-        'attachment; filename=' + encodeURIComponent(section.title + '.epub')
-      )
-      fs.createReadStream(epubPath).pipe(res)
-    } else {
-      res.redirect(`${process.env.basePath}/404`)
-    }
+    await downloadLocalEpubFile(res, section.title)
   } catch (error) {
     console.error(error)
     res.redirect(`${process.env.basePath}/404`)
