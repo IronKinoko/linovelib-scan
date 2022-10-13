@@ -4,155 +4,211 @@ import { load } from 'cheerio'
 import fs from 'fs-extra'
 import mime from 'mime-types'
 import mustache from 'mustache'
-import pLimit from 'p-limit'
 import path from 'path'
-import url from 'url'
-import { axios } from '../apis/api.js'
-import { Book } from '../types.js'
-import { isURL, md5 } from '../utils.js'
+import { queryAsset, queryChapter } from '../apis/api.js'
+import { paths } from '../constants/paths.js'
+import { Book, Section } from '../types.js'
+import { isURL } from '../utils.js'
+import { tryFixImg } from './tryFixImg.js'
 
-const limit = pLimit(5)
-async function downloadAssets(OEBPSRoot: string, book: Book) {
-  const imageRoot = path.resolve(OEBPSRoot, 'Images')
-  const cacheRoot = path.resolve(process.cwd(), '.cache', 'assets')
+class EpubBuilder {
+  private bookRoot: string
+  private OEBPSRoot: string
+  epubPath: string
+  private book!: Book
 
-  await fs.ensureDir(cacheRoot)
+  constructor(private section: Section) {
+    this.bookRoot = path.resolve(paths.epubs, this.section.title)
+    this.epubPath = this.bookRoot + '.epub'
+    this.OEBPSRoot = path.resolve(this.bookRoot, 'OEBPS')
+  }
 
-  const imageAssets = await Promise.all(
-    book.chapters.map(async (chapter) => {
-      const $ = load(chapter.content, null, false)
+  async build() {
+    await fs.ensureDir(this.bookRoot)
+    await fs.emptyDir(this.bookRoot)
+    await fs.copy(paths.templates, this.bookRoot)
 
-      const imageAssets = await Promise.all(
-        $('img')
-          .toArray()
-          .map((dom) =>
-            limit(async () => {
+    this.book = await this.queryBook()
+
+    await this.genNCX()
+    await this.genOPF()
+    await this.genChapters()
+    await this.output()
+
+    return this.epubPath
+  }
+
+  private async queryBook(): Promise<Book> {
+    const chapters = this.section.chapters.map((chapter, idx) => {
+      return {
+        ...chapter,
+        order: idx + 1,
+        fileName: `chapter${`${idx + 1}`.padStart(4, '0')}.xhtml`,
+        done: false,
+        content: '',
+        prevChapter: '',
+        nextChapter: '',
+      }
+    })
+
+    do {
+      await Promise.all(
+        chapters.map(async (chapter, i) => {
+          if (!chapter.id) {
+            const nextChapter = chapters[i + 1]
+            const prevChapter = chapters[i - 1]
+            chapter.id = prevChapter?.nextChapter || nextChapter?.prevChapter
+          }
+
+          if (!chapter.id || chapter.done) return
+          let nextPageId = chapter.id
+          let chapterInfo
+
+          do {
+            chapterInfo = await queryChapter(nextPageId)
+            chapter.content += chapterInfo.content
+            nextPageId = chapterInfo.nextPage
+
+            chapter.prevChapter ||= chapterInfo.prevChapter
+            chapter.nextChapter ||= chapterInfo.nextChapter
+          } while (nextPageId)
+
+          chapter.content = tryFixImg(chapter.content)
+
+          chapter.done = true
+        })
+      )
+    } while (chapters.some((chapter) => !chapter.done))
+
+    return {
+      ...this.section,
+      chapters,
+    }
+  }
+
+  private async downloadAssets() {
+    const imageRoot = path.resolve(this.OEBPSRoot, 'Images')
+
+    const imageAssets = await Promise.all(
+      this.book.chapters.map(async (chapter) => {
+        const $ = load(chapter.content, null, false)
+
+        const imageAssets = await Promise.all(
+          $('img')
+            .toArray()
+            .map(async (dom) => {
               const src = $(dom).attr('src')!
               if (!isURL(src)) {
                 $(dom).remove()
                 return ''
               }
-              const ext = src.split('?')[0].split('.').pop()
-              const id = md5(src)
-              const fileName = `${id}.${ext}`
-              const localCachePath = path.resolve(cacheRoot, fileName)
-              const filePath = path.resolve(imageRoot, fileName)
 
-              $(dom).attr('src', `../Images/${fileName}`)
               try {
-                if (!(await fs.pathExists(localCachePath))) {
-                  const res = await axios.get(src, { responseType: 'arraybuffer' })
-                  await fs.writeFile(localCachePath, res.data)
-                }
+                const file = await queryAsset(src)
 
-                await fs.copy(localCachePath, filePath)
+                const filePath = path.resolve(imageRoot, file.name)
+                $(dom).attr('src', `../Images/${file.name}`)
+
+                await fs.copy(file.path, filePath)
+
+                return file.name
               } catch (error) {
-                Axios.isAxiosError(error) && console.error(error.code, error.message)
+                Axios.isAxiosError(error)
+                  ? console.error({ code: error.code, message: error.message })
+                  : console.error(error)
                 console.error(src, 'download error')
                 $(dom).remove()
               }
 
-              return fileName
+              return ''
             })
-          )
-      )
-      chapter.content = $.html()
-        .replace(/<img(.*?)>/gi, '<img$1/>')
-        .replace(new RegExp('<br>', 'gi'), '')
-        .replace(new RegExp('“', 'gi'), '「')
-        .replace(new RegExp('”', 'gi'), '」')
-        .replace(new RegExp('‘', 'gi'), '『')
-        .replace(new RegExp('’', 'gi'), '』')
+        )
+        chapter.content = $.html()
+          .replace(/<img(.*?)>/gi, '<img$1/>')
+          .replace(new RegExp('<br>', 'gi'), '')
+          .replace(new RegExp('“', 'gi'), '「')
+          .replace(new RegExp('”', 'gi'), '」')
+          .replace(new RegExp('‘', 'gi'), '『')
+          .replace(new RegExp('’', 'gi'), '』')
 
-      return imageAssets.filter(Boolean)
+        return imageAssets.filter(Boolean)
+      })
+    )
+
+    return imageAssets.flat().map((url) => {
+      return { url, type: mime.lookup(url) }
     })
-  )
-
-  return imageAssets.flat().map((url) => {
-    return { url, type: mime.lookup(url) }
-  })
-}
-
-async function genNCX(OEBPSRoot: string, book: Book) {
-  const filePath = path.resolve(OEBPSRoot, 'toc.ncx')
-  let content = await fs.readFile(filePath, 'utf-8')
-
-  const xml = mustache.render(content, book)
-
-  await fs.writeFile(filePath, xml)
-}
-
-async function genOPF(OEBPSRoot: string, book: Book) {
-  const filePath = path.resolve(OEBPSRoot, 'content.opf')
-  let content = await fs.readFile(filePath, 'utf-8')
-
-  const imageAssets = await downloadAssets(OEBPSRoot, book)
-  const cover = await genCover(OEBPSRoot, book)
-  const xml = mustache.render(content, {
-    ...book,
-    cover,
-    imageAssets,
-  })
-
-  await fs.writeFile(filePath, xml)
-}
-
-async function genCover(OEBPSRoot: string, book: Book) {
-  const filePath = path.resolve(OEBPSRoot, 'Text', 'cover.xhtml')
-  let content = await fs.readFile(filePath, 'utf-8')
-
-  let cover: string | undefined
-  for (const chapter of book.chapters) {
-    const $ = load(chapter.content)
-    cover = $('img').attr('src')
-    if (cover) break
   }
 
-  const xml = mustache.render(content, { cover })
+  private async genNCX() {
+    const filePath = path.resolve(this.OEBPSRoot, 'toc.ncx')
+    let content = await fs.readFile(filePath, 'utf-8')
 
-  await fs.writeFile(filePath, xml)
-  return cover?.replace('../Images/', '')
-}
+    const xml = mustache.render(content, this.book)
 
-async function genChapters(OEBPSRoot: string, book: Book) {
-  const templatePath = path.resolve(OEBPSRoot, 'Text', 'chapter.xhtml')
-  let tempalte = await fs.readFile(templatePath, 'utf-8')
-  await fs.remove(templatePath)
+    await fs.writeFile(filePath, xml)
+  }
 
-  await Promise.all(
-    book.chapters.map(async (chapter) => {
-      const chapterPath = path.resolve(OEBPSRoot, 'Text', chapter.fileName)
+  private async genOPF() {
+    const filePath = path.resolve(this.OEBPSRoot, 'content.opf')
+    let content = await fs.readFile(filePath, 'utf-8')
 
-      const xml = mustache.render(tempalte, chapter)
-
-      await fs.writeFile(chapterPath, xml)
+    const imageAssets = await this.downloadAssets()
+    const cover = await this.genCover()
+    const xml = mustache.render(content, {
+      ...this.book,
+      cover,
+      imageAssets,
     })
-  )
+
+    await fs.writeFile(filePath, xml)
+  }
+
+  private async genCover() {
+    const filePath = path.resolve(this.OEBPSRoot, 'Text', 'cover.xhtml')
+    let content = await fs.readFile(filePath, 'utf-8')
+
+    let cover: string | undefined
+    for (const chapter of this.book.chapters) {
+      const $ = load(chapter.content)
+      cover = $('img').attr('src')
+      if (cover) break
+    }
+
+    const xml = mustache.render(content, { cover })
+
+    await fs.writeFile(filePath, xml)
+    return cover?.replace('../Images/', '')
+  }
+
+  private async genChapters() {
+    const templatePath = path.resolve(this.OEBPSRoot, 'Text', 'chapter.xhtml')
+    let tempalte = await fs.readFile(templatePath, 'utf-8')
+    await fs.remove(templatePath)
+
+    await Promise.all(
+      this.book.chapters.map(async (chapter) => {
+        const chapterPath = path.resolve(this.OEBPSRoot, 'Text', chapter.fileName)
+
+        const xml = mustache.render(tempalte, chapter)
+
+        await fs.writeFile(chapterPath, xml)
+      })
+    )
+  }
+
+  private async output() {
+    const stream = fs.createWriteStream(this.epubPath)
+    const archive = archiver('zip')
+    archive.pipe(stream)
+    archive.directory(this.bookRoot, false)
+    await archive.finalize()
+
+    await fs.remove(this.bookRoot)
+  }
 }
 
-async function epub(bookRoot: string) {
-  const output = fs.createWriteStream(bookRoot + '.epub')
-  const archive = archiver('zip')
-  archive.pipe(output)
-  archive.directory(bookRoot, false)
-  await archive.finalize()
-
-  // await fs.remove(bookRoot)
-}
-
-export async function genEpub(book: Book) {
-  const bookRoot = path.resolve(process.cwd(), 'epubs', book.title)
-  const templateRoot = path.resolve(path.dirname(url.fileURLToPath(import.meta.url)), 'templates')
-
-  await fs.ensureDir(bookRoot)
-  await fs.emptyDir(bookRoot)
-  await fs.copy(templateRoot, bookRoot)
-
-  const OEBPSRoot = path.resolve(bookRoot, 'OEBPS')
-
-  await genNCX(OEBPSRoot, book)
-  await genOPF(OEBPSRoot, book)
-  await genChapters(OEBPSRoot, book)
-
-  await epub(bookRoot)
+export async function genEpub(section: Section) {
+  const builder = new EpubBuilder(section)
+  await builder.build()
 }

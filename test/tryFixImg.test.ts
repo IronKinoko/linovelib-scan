@@ -1,4 +1,4 @@
-import { tryFixImg } from '../src/apis/tryFixImg.js'
+import { tryFixImg } from '../src/epub/tryFixImg.js'
 import { load } from 'cheerio'
 export const imgRE = /src="https:\/\/img\.linovelib\.com\/\d+\/\d+\/\d+\/\d+\.[a-z]+?"/
 

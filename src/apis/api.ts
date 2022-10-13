@@ -1,10 +1,10 @@
 import { default as Axios } from 'axios'
 import fs from 'fs-extra'
-import pLimit from 'p-limit'
 import path from 'path'
-import { Book, Catalog, Section } from '../types.js'
+import { paths } from '../constants/paths.js'
+import { Catalog } from '../types.js'
+import { md5 } from '../utils.js'
 import { parseCatalog, parseChapter } from './parser.js'
-import { tryFixImg } from './tryFixImg.js'
 
 export const axios = Axios.create({
   baseURL: 'https://w.linovelib.com',
@@ -17,7 +17,7 @@ export const axios = Axios.create({
 })
 
 async function fetchHTML(url: string) {
-  let filePath = path.join(process.cwd(), '.cache', url)
+  let filePath = path.join(paths.cache, url)
   const fileDir = path.dirname(filePath)
   let filename = path.basename(filePath)
   filePath = filePath.replace(filename, encodeURIComponent(filename))
@@ -37,7 +37,7 @@ async function fetchHTML(url: string) {
 }
 
 export async function queryCatalog(bookId: string): Promise<Catalog> {
-  if(!/\d+/.test(bookId)) throw new Error('Invalid bookId')
+  if (!/\d+/.test(bookId)) throw new Error('Invalid bookId')
   const res = await fetchHTML(`/novel/${bookId}/catalog`)
 
   return {
@@ -52,53 +52,17 @@ export async function queryChapter(chapterId: string) {
   return parseChapter(res)
 }
 
-export async function queryBook(section: Section): Promise<Book> {
-  const chapters = section.chapters.map((chapter, idx) => {
-    return {
-      ...chapter,
-      order: idx + 1,
-      fileName: `chapter${`${idx + 1}`.padStart(4, '0')}.xhtml`,
-      done: false,
-      content: '',
-      prevChapter: '',
-      nextChapter: '',
-    }
-  })
+export async function queryAsset(src: string) {
+  const ext = src.split('?')[0].split('.').pop()
+  const id = md5(src)
+  const name = `${id}.${ext}`
+  const localCachePath = path.resolve(paths.assets, name)
 
-  const limit = pLimit(3)
-  do {
-    await Promise.all(
-      chapters.map((chapter, i) =>
-        limit(async () => {
-          if (!chapter.id) {
-            const nextChapter = chapters[i + 1]
-            const prevChapter = chapters[i - 1]
-            chapter.id = prevChapter?.nextChapter || nextChapter?.prevChapter
-          }
-
-          if (!chapter.id || chapter.done) return
-          let nextPageId = chapter.id
-          let chapterInfo
-
-          do {
-            chapterInfo = await queryChapter(nextPageId)
-            chapter.content += chapterInfo.content
-            nextPageId = chapterInfo.nextPage
-
-            chapter.prevChapter ||= chapterInfo.prevChapter
-            chapter.nextChapter ||= chapterInfo.nextChapter
-          } while (nextPageId)
-
-          chapter.content = tryFixImg(chapter.content)
-
-          chapter.done = true
-        })
-      )
-    )
-  } while (chapters.some((chapter) => !chapter.done))
-
-  return {
-    ...section,
-    chapters,
+  if (!(await fs.pathExists(localCachePath))) {
+    const res = await axios.get(src, { responseType: 'arraybuffer' })
+    await fs.ensureDir(paths.assets)
+    await fs.writeFile(localCachePath, res.data)
   }
+
+  return { path: localCachePath, name }
 }
