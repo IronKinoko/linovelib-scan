@@ -1,7 +1,21 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { queryCatalog } from '@ironkinoko/linovelib-scan'
+import { Catalog, paths, queryCatalog } from '@ironkinoko/linovelib-scan'
 import path from 'path'
 import fs from 'fs-extra'
+import { cache } from 'utils/cache'
+
+export async function cleanBookCache(catalog: Catalog) {
+  const novelRoot = path.resolve(paths.cache, 'novel', catalog.id)
+  await fs.remove(novelRoot)
+
+  for (const section of catalog.sections) {
+    const epubPath = path.resolve(paths.epubs, section.title + '.epub')
+    await fs.remove(epubPath)
+
+    const assetsPath = path.resolve(paths.assets, section.id)
+    await fs.remove(assetsPath)
+  }
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -9,16 +23,14 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const catalog = await queryCatalog(bookId)
 
+    const cacheKey = `bookId:${bookId}`
+    cache.set(cacheKey, catalog)
+
     switch (req.method) {
       case 'DELETE':
-        const novelRoot = path.resolve(process.cwd(), '.cache', 'novel', bookId)
-        await fs.remove(novelRoot)
+        cache.del(cacheKey)
 
-        for (const section of catalog.sections) {
-          const epubPath = path.resolve(process.cwd(), 'epubs', section.title + '.epub')
-          await fs.remove(epubPath)
-        }
-
+        await cleanBookCache(catalog)
         res.json({ code: 0 })
         break
 

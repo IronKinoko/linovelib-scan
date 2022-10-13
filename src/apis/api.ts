@@ -5,8 +5,11 @@ import { paths } from '../constants/paths.js'
 import { Catalog } from '../types.js'
 import { md5 } from '../utils.js'
 import { parseCatalog, parseChapter } from './parser.js'
-
+import http from 'http'
+import https from 'https'
 export const axios = Axios.create({
+  httpAgent: new http.Agent({ keepAlive: true, maxSockets: 10 }),
+  httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 10 }),
   baseURL: 'https://w.linovelib.com',
   headers: {
     common: {
@@ -40,10 +43,7 @@ export async function queryCatalog(bookId: string): Promise<Catalog> {
   if (!/\d+/.test(bookId)) throw new Error('Invalid bookId')
   const res = await fetchHTML(`/novel/${bookId}/catalog`)
 
-  return {
-    id: bookId,
-    ...parseCatalog(res),
-  }
+  return { id: bookId, ...parseCatalog(res) }
 }
 
 export async function queryChapter(chapterId: string) {
@@ -52,15 +52,16 @@ export async function queryChapter(chapterId: string) {
   return parseChapter(res)
 }
 
-export async function queryAsset(src: string) {
+export async function queryAsset(dir: string, src: string) {
+  const root = path.resolve(paths.assets, dir)
   const ext = src.split('?')[0].split('.').pop()
   const id = md5(src)
   const name = `${id}.${ext}`
-  const localCachePath = path.resolve(paths.assets, name)
+  const localCachePath = path.resolve(root, name)
 
   if (!(await fs.pathExists(localCachePath))) {
     const res = await axios.get(src, { responseType: 'arraybuffer' })
-    await fs.ensureDir(paths.assets)
+    await fs.ensureDir(root)
     await fs.writeFile(localCachePath, res.data)
   }
 

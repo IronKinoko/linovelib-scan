@@ -1,5 +1,6 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { Section } from '../types.js'
 
 function resolve(...args: string[]) {
   return path.resolve(process.cwd(), ...args)

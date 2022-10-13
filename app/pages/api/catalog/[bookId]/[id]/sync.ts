@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { queryBook, queryCatalog, genEpub } from '@ironkinoko/linovelib-scan'
+import { queryCatalog, genEpub, paths } from '@ironkinoko/linovelib-scan'
 import { cache } from 'utils/cache'
 import path from 'path'
 import fs from 'fs-extra'
@@ -15,7 +15,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!section) throw new Error('Invalid section id')
 
-    const epubPath = path.resolve(process.cwd(), 'epubs', section.title + '.epub')
+    const epubPath = path.resolve(paths.epubs, section.title + '.epub')
     if (await fs.pathExists(epubPath)) {
       return res.json({ code: 0, section, done: true })
     }
@@ -28,8 +28,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       } else return res.json({ code: 0, section, done: false })
     } else {
       cache.set(id, { code: 0 })
-      queryBook(section)
-        .then(genEpub)
+      genEpub(section)
         .then(() => {
           cache.del(id)
         })

@@ -1,10 +1,10 @@
-import { queryCatalog } from '@ironkinoko/linovelib-scan'
+import { paths, queryCatalog } from '@ironkinoko/linovelib-scan'
 import type { NextApiRequest, NextApiResponse } from 'next'
 import path from 'path'
 import fs from 'fs-extra'
 
 export async function downloadLocalEpubFile(res: NextApiResponse, sectionTitle: string) {
-  const epubPath = path.resolve(process.cwd(), 'epubs', sectionTitle + '.epub')
+  const epubPath = path.resolve(paths.epubs, sectionTitle + '.epub')
   if (await fs.pathExists(epubPath)) {
     res.setHeader(
       'Content-Disposition',

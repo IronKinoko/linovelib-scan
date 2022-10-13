@@ -55,9 +55,7 @@ export function parseChapter(html: string) {
   const $content = $('#acontent')
   $content.find('.cgo').remove()
 
-  let content = ($content.html() || '')
-    .trim()
-    .replace(/[\r\n]/gim, '')
+  let content = ($content.html() || '').trim().replace(/[\r\n]/gim, '')
 
   const $page = $('#footlink')
 

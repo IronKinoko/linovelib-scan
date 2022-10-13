@@ -104,7 +104,7 @@ class EpubBuilder {
               }
 
               try {
-                const file = await queryAsset(src)
+                const file = await queryAsset(this.section.id, src)
 
                 const filePath = path.resolve(imageRoot, file.name)
                 $(dom).attr('src', `../Images/${file.name}`)
@@ -210,5 +210,5 @@ class EpubBuilder {
 
 export async function genEpub(section: Section) {
   const builder = new EpubBuilder(section)
-  await builder.build()
+  return await builder.build()
 }
