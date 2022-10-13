@@ -23,8 +23,12 @@ const Home: NextPage = () => {
             autoFocus
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
-                const bookId = /^\d+$/.test(e.currentTarget.value) ? e.currentTarget.value : ''
-                router.replace({ query: { bookId: bookId } })
+                const bookId = e.currentTarget.value
+                if (/^\d+$/.test(bookId)) router.replace({ query: { bookId } })
+                else {
+                  e.currentTarget.value = ''
+                  router.replace({ query: null })
+                }
               }
             }}
           />
