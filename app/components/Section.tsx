@@ -40,7 +40,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   return (
     <section className="relative">
       <div
-        className="border-b px-4 py-4 sticky -top-1 bg-gray-100 dark:bg-slate-900 cursor-pointer dark:border-slate-700"
+        className="border-b px-4 py-4 sticky -top-1 bg-gray-100 dark:bg-slate-900 cursor-pointer "
         onClick={handleSwitch}
       >
         <div className="flex justify-between items-center">
@@ -55,7 +55,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
       </div>
       <div className="text-sm bg-slate-50 dark:bg-slate-800" hidden={!open}>
         {section.chapters.map((chapter, idx) => (
-          <div key={idx} className="border-b px-4 py-3 dark:border-slate-700">
+          <div key={idx} className="border-b px-4 py-3 ">
             {chapter.title}
           </div>
         ))}

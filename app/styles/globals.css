@@ -9,6 +9,9 @@ body {
   a {
     @apply text-sky-500;
   }
+  * {
+    @apply dark:border-slate-700;
+  }
 }
 
 @layer components {
