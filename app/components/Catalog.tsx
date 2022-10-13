@@ -16,7 +16,7 @@ const Catalog: FC<{ bookId: string }> = ({ bookId }) => {
 
   if (!data || !bookId || data.code !== 0) {
     return (
-      <div className="border border-x-0 p-4">
+      <div className="border border-x-0 p-4 dark:border-slate-700">
         {isValidating ? '加载中...' : data?.message || '输入bookId，回车搜索'}
       </div>
     )

@@ -37,6 +37,7 @@ async function fetchHTML(url: string) {
 }
 
 export async function queryCatalog(bookId: string): Promise<Catalog> {
+  if(!/\d+/.test(bookId)) throw new Error('Invalid bookId')
   const res = await fetchHTML(`/novel/${bookId}/catalog`)
 
   return {

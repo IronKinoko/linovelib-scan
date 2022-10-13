@@ -8,9 +8,13 @@ const Home: NextPage = () => {
   return (
     <div>
       <div className="p-4">
-        <div className="md:w-64 relative flex items-center">
+        <form
+          className="md:w-64 relative flex items-center"
+          action="#"
+          onSubmit={(e) => e.preventDefault()}
+        >
           <input
-            className="block w-full text-sm px-3 py-2 bg-gray-800 bg-opacity-5 leading-tight rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-gray-200 focus:bg-white hover:bg-opacity-10 transition-colors dark:bg-slate-800 dark:highlight-white/5 dark:hover:bg-slate-700"
+            className="block w-full text-sm px-3 py-2 bg-gray-800 bg-opacity-5 leading-tight rounded-lg appearance-none focus:outline-none focus:ring-1 focus:ring-gray-200 focus:dark:ring-slate-600 focus:bg-white focus:dark:bg-black hover:bg-opacity-10 transition-colors dark:bg-slate-800 dark:hover:bg-slate-700"
             spellCheck="false"
             placeholder="输入 bookId 搜索"
             type="search"
@@ -22,11 +26,11 @@ const Home: NextPage = () => {
             }}
           />
           <div className="hidden sm:flex absolute inset-y-0 right-0 py-1.5 pr-1.5 select-none pointer-events-none">
-            <kbd className="inline-flex items-center px-1.5 font-mono text-sm font-medium bg-white dark:bg-dark dark:bg-opacity-50 text-gray-400 dark:text-gray-500 dark:border-gray-100 dark:border-opacity-20 border rounded">
+            <kbd className="inline-flex items-center px-1.5 font-mono text-sm font-medium bg-white dark:bg-slate-800 dark:bg-opacity-50 text-gray-400 dark:text-gray-500 dark:border-gray-100/20 border rounded">
               Enter
             </kbd>
           </div>
-        </div>
+        </form>
       </div>
 
       <Catalog bookId={bookId} />
