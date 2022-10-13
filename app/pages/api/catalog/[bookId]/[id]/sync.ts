@@ -10,6 +10,8 @@ type SyncResult = {
   message?: string
 }
 
+const defaultProgress: SyncProgress = { assets: 0, chapters: 0, status: 'chapter', totalAssets: 0 }
+
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { bookId, id } = req.query as Record<string, string>
@@ -41,7 +43,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         })
     }
 
-    res.json({ code: 0, done: false })
+    res.json({ code: 0, progress: defaultProgress, done: false })
   } catch (error) {
     console.error(error)
     res.send({ code: 1, message: error.message })

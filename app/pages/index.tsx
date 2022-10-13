@@ -22,7 +22,10 @@ const Home: NextPage = () => {
             enterKeyHint="search"
             autoFocus
             onKeyDown={(e) => {
-              if (e.key === 'Enter') router.replace({ query: { bookId: e.currentTarget.value } })
+              if (e.key === 'Enter') {
+                const bookId = /^\d+$/.test(e.currentTarget.value) ? e.currentTarget.value : ''
+                router.replace({ query: { bookId: bookId } })
+              }
             }}
           />
           <div className="hidden sm:flex absolute inset-y-0 right-0 py-1.5 pr-1.5 select-none pointer-events-none">

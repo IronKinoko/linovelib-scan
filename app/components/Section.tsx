@@ -1,9 +1,10 @@
 import React, { FC, useState } from 'react'
-import type { Section as ISection } from '@ironkinoko/linovelib-scan'
+import type { Section as ISection, SyncProgress } from '@ironkinoko/linovelib-scan'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
+import Progress from './Progress'
 
-type SyncResult = { code: number; message: string; done: boolean }
+type SyncResult = { code: number; progress: SyncProgress; message: string; done: boolean }
 
 const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section }) => {
   const [open, setOpen] = useState(false)
@@ -14,12 +15,16 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   const [loading, setLoading] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState('')
 
+  const [progress, setProgress] = useState<SyncProgress>()
+
   const handleSync = (e: React.MouseEvent) => {
     e.stopPropagation()
     if (loading) return
     ;(async function fn() {
       setLoading(true)
       const res: SyncResult = await axios.get(`/api/catalog/${key}/sync`).then((res) => res.data)
+      setProgress(res.progress)
+
       if (res.code !== 0) {
         setErrorMessage(res.message)
         setLoading(false)
@@ -31,7 +36,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
           const blob = new Blob([res.data], { type: 'application/epub+zip' })
           saveAs(blob, fileName)
         } else {
-          setTimeout(fn, 500)
+          setTimeout(fn, 300)
         }
       }
     })()
@@ -52,6 +57,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
           </div>
         </div>
         {errorMessage && <div className="mt-2 text-sm text-red-500">{errorMessage}</div>}
+        <Progress progress={progress} />
       </div>
       <div className="text-sm bg-slate-50 dark:bg-slate-800" hidden={!open}>
         {section.chapters.map((chapter, idx) => (
