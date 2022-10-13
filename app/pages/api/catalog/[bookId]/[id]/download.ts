@@ -10,6 +10,10 @@ export async function downloadLocalEpubFile(res: NextApiResponse, sectionTitle: 
       'Content-Disposition',
       'attachment; filename=' + encodeURIComponent(sectionTitle + '.epub')
     )
+
+    const stat = await fs.stat(epubPath)
+    res.setHeader('Content-Length', stat.size)
+    res.setHeader('Content-Type', 'application/epub+zip')
     fs.createReadStream(epubPath).pipe(res)
   } else {
     res.redirect(`${process.env.basePath}/404`)

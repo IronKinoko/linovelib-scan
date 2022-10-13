@@ -1,18 +1,25 @@
 import React, { FC } from 'react'
 import { SyncProgress } from '@ironkinoko/linovelib-scan'
 
-const Progress: FC<{ progress?: SyncProgress }> = ({ progress }) => {
-  if (!progress || progress.status === 'done') return null
+export interface FetchProgress extends SyncProgress {
+  downloadProgress?: number
+}
 
+const Progress: FC<{ progress?: FetchProgress }> = ({ progress }) => {
+  if (!progress) return null
+
+  const { status, assets, totalAssets, downloadProgress = 0 } = progress
   return (
     <div className="absolute inset-0">
-      {progress.status === 'chapter' && (
+      {status === 'chapter' && (
         <div className="absolute inset-0 progress-chapter from-sky-400 to-sky-100 opacity-10 dark:from-slate-800 dark:to-slate-600"></div>
       )}
-      {progress.status === 'asset' && (
+      {(status === 'asset' || status === 'done') && (
         <div
-          className="absolute inset-0 bg-sky-400/10 w-3/5 transition-all"
-          style={{ width: (progress.assets / progress.totalAssets) * 100 + '%' }}
+          className="absolute inset-0 bg-sky-400/10 w-0 transition-all"
+          style={{
+            width: (assets / totalAssets + downloadProgress) * 50 + '%',
+          }}
         />
       )}
     </div>

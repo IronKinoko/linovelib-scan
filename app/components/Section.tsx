@@ -1,10 +1,10 @@
 import React, { FC, useState } from 'react'
-import type { Section as ISection, SyncProgress } from '@ironkinoko/linovelib-scan'
+import type { Section as ISection } from '@ironkinoko/linovelib-scan'
 import axios from 'axios'
 import { saveAs } from 'file-saver'
-import Progress from './Progress'
+import Progress, { FetchProgress } from './Progress'
 
-type SyncResult = { code: number; progress: SyncProgress; message: string; done: boolean }
+type SyncResult = { code: number; progress: FetchProgress; message: string; done: boolean }
 
 const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section }) => {
   const [open, setOpen] = useState(false)
@@ -15,7 +15,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   const [loading, setLoading] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState('')
 
-  const [progress, setProgress] = useState<SyncProgress>()
+  const [progress, setProgress] = useState<FetchProgress>()
 
   const handleSync = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -31,10 +31,24 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
       } else {
         if (res.done) {
           setLoading(false)
-          const res = await axios.get(`/api/catalog/${key}/download`, { responseType: 'blob' })
+          let progress: FetchProgress = {
+            status: 'done',
+            assets: 1,
+            chapters: 0,
+            totalAssets: 1,
+            downloadProgress: 0,
+          }
+          setProgress(progress)
+          const res = await axios.get(`/api/catalog/${key}/download`, {
+            responseType: 'blob',
+            onDownloadProgress(p) {
+              progress.downloadProgress = p.progress
+              setProgress({ ...progress })
+            },
+          })
+          setTimeout(() => setProgress(undefined), 300)
           const fileName = decodeURIComponent(res.headers['content-disposition']?.split('=').pop()!)
-          const blob = new Blob([res.data], { type: 'application/epub+zip' })
-          saveAs(blob, fileName)
+          saveAs(res.data, fileName)
         } else {
           setTimeout(fn, 300)
         }
