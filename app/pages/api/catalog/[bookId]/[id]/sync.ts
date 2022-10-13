@@ -1,10 +1,14 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { queryCatalog, genEpub, paths } from '@ironkinoko/linovelib-scan'
+import { queryCatalog, genEpub, paths, SyncProgress } from '@ironkinoko/linovelib-scan'
 import { cache } from 'utils/cache'
 import path from 'path'
 import fs from 'fs-extra'
 
-type SyncResult = { code: number; message?: string }
+type SyncResult = {
+  code: number
+  progress?: SyncProgress
+  message?: string
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
@@ -17,7 +21,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     const epubPath = path.resolve(paths.epubs, section.title + '.epub')
     if (await fs.pathExists(epubPath)) {
-      return res.json({ code: 0, section, done: true })
+      return res.json({ code: 0, done: true })
     }
 
     if (cache.has(id)) {
@@ -25,10 +29,10 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       if (result.code !== 0) {
         cache.del(id)
         return res.json(result)
-      } else return res.json({ code: 0, section, done: false })
+      } else return res.json({ code: 0, progress: result.progress, done: false })
     } else {
       cache.set(id, { code: 0 })
-      genEpub(section)
+      genEpub(section, { onSync: (progress) => cache.set(id, { code: 0, progress }) })
         .then(() => {
           cache.del(id)
         })

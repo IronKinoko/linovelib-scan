@@ -7,7 +7,7 @@ import mustache from 'mustache'
 import path from 'path'
 import { queryAsset, queryChapter } from '../apis/api.js'
 import { paths } from '../constants/paths.js'
-import { Book, Section } from '../types.js'
+import { Book, BuilderOptions, Section, SyncProgress } from '../types.js'
 import { isURL } from '../utils.js'
 import { tryFixImg } from './tryFixImg.js'
 
@@ -17,7 +17,14 @@ class EpubBuilder {
   epubPath: string
   private book!: Book
 
-  constructor(private section: Section) {
+  private progress: SyncProgress = {
+    status: 'chapter',
+    chapters: 0,
+    assets: 0,
+    totalAssets: 0,
+  }
+
+  constructor(private section: Section, private options: BuilderOptions = {}) {
     this.bookRoot = path.resolve(paths.epubs, this.section.title)
     this.epubPath = this.bookRoot + '.epub'
     this.OEBPSRoot = path.resolve(this.bookRoot, 'OEBPS')
@@ -66,6 +73,8 @@ class EpubBuilder {
 
           do {
             chapterInfo = await queryChapter(nextPageId)
+            this.updateProgress('chapter', nextPageId)
+
             chapter.content += chapterInfo.content
             nextPageId = chapterInfo.nextPage
 
@@ -93,6 +102,8 @@ class EpubBuilder {
       this.book.chapters.map(async (chapter) => {
         const $ = load(chapter.content, null, false)
 
+        this.progress.totalAssets += $('img').length
+
         const imageAssets = await Promise.all(
           $('img')
             .toArray()
@@ -105,6 +116,7 @@ class EpubBuilder {
 
               try {
                 const file = await queryAsset(this.section.id, src)
+                this.updateProgress('asset', src)
 
                 const filePath = path.resolve(imageRoot, file.name)
                 $(dom).attr('src', `../Images/${file.name}`)
@@ -118,6 +130,7 @@ class EpubBuilder {
                   : console.error(error)
                 console.error(src, 'download error')
                 $(dom).remove()
+                this.progress.totalAssets--
               }
 
               return ''
@@ -205,10 +218,28 @@ class EpubBuilder {
     await archive.finalize()
 
     await fs.remove(this.bookRoot)
+
+    this.updateProgress('done')
+  }
+
+  private updateProgress(status: SyncProgress['status'], id?: string) {
+    this.progress.status = status
+    this.progress.id = id
+    switch (status) {
+      case 'chapter':
+        this.progress.chapters++
+
+        break
+      case 'asset':
+        this.progress.assets++
+        break
+    }
+
+    this.options.onSync?.(this.progress)
   }
 }
 
-export async function genEpub(section: Section) {
-  const builder = new EpubBuilder(section)
+export async function genEpub(section: Section, options?: BuilderOptions) {
+  const builder = new EpubBuilder(section, options)
   return await builder.build()
 }

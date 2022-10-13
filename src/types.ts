@@ -30,3 +30,14 @@ export interface Book {
   author: string
   chapters: ChapterWithCotnent[]
 }
+
+export interface SyncProgress {
+  status: 'chapter' | 'asset' | 'done'
+  id?: string
+  chapters: number
+  assets: number
+  totalAssets: number
+}
+export interface BuilderOptions {
+  onSync?: (progress: SyncProgress) => void
+}
