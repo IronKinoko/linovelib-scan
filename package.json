@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "nodemon -w src -e \"*\" -x ts-node-esm src/cli.ts 2923 第三卷",
     "build": "rm -rf dist && tsc && cp -r src/epub/templates dist/epub/templates",
+    "epub":"NODE_ENV=development ts-node-esm src/cli.ts",
     "release": "pnpm build && npm publish",
     "test": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
     "test:coverage": "pnpm test -- --coverage"

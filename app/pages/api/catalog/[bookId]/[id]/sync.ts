@@ -1,13 +1,12 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 import { queryCatalog, genEpub, paths, SyncProgress } from '@ironkinoko/linovelib-scan'
 import { cache } from 'utils/cache'
-import path from 'path'
-import fs from 'fs-extra'
 
 type SyncResult = {
   code: number
   progress?: SyncProgress
   message?: string
+  done?: boolean
 }
 
 const defaultProgress: SyncProgress = { assets: 0, chapters: 0, status: 'chapter', totalAssets: 0 }
@@ -21,26 +20,19 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!section) throw new Error('Invalid section id')
 
-    const epubPath = path.resolve(paths.epubs, section.title + '.epub')
-    if (await fs.pathExists(epubPath)) {
-      return res.json({ code: 0, done: true })
-    }
-
     if (cache.has(id)) {
       const result = cache.get<SyncResult>(id)!
-      if (result.code !== 0) {
-        cache.del(id)
-        return res.json(result)
-      } else return res.json({ code: 0, progress: result.progress, done: false })
+      if (result.code !== 0 || result.done) cache.del(id)
+      return res.json(result)
     } else {
-      cache.set(id, { code: 0 })
-      genEpub(section, { onSync: (progress) => cache.set(id, { code: 0, progress }) })
-        .then(() => {
-          cache.del(id)
-        })
-        .catch((error) => {
-          cache.set(id, { code: 1, message: error.message })
-        })
+      cache.set<SyncResult>(id, { code: 0, progress: defaultProgress, done: false })
+      genEpub(section, {
+        onSync: (progress) =>
+          cache.set(id, { code: 0, progress, done: progress.status === 'done' }),
+      }).catch((error) => {
+        console.error(error)
+        cache.set(id, { code: 1, message: error.message })
+      })
     }
 
     res.json({ code: 0, progress: defaultProgress, done: false })

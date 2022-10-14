@@ -143,6 +143,7 @@ class EpubBuilder {
           .replace(new RegExp('”', 'gi'), '」')
           .replace(new RegExp('‘', 'gi'), '『')
           .replace(new RegExp('’', 'gi'), '』')
+          .replace(/(<\/.*?>)/g,'$1\n')
 
         return imageAssets.filter(Boolean)
       })
@@ -217,7 +218,7 @@ class EpubBuilder {
     archive.directory(this.bookRoot, false)
     await archive.finalize()
 
-    await fs.remove(this.bookRoot)
+    if(process.env.NODE_ENV !== 'development') await fs.remove(this.bookRoot)
 
     this.updateProgress('done')
   }

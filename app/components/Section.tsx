@@ -19,6 +19,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
 
   const handleSync = (e: React.MouseEvent) => {
     e.stopPropagation()
+    setErrorMessage('')
     if (loading) return
     ;(async function fn() {
       setLoading(true)
