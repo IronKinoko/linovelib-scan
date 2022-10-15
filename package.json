@@ -1,6 +1,6 @@
 {
   "name": "@ironkinoko/linovelib-scan",
-  "version": "1.0.7",
+  "version": "1.0.8",
   "description": "download linovelib as epub",
   "scripts": {
     "dev": "nodemon -w src -e \"*\" -x ts-node-esm src/cli.ts 2923 第三卷",
