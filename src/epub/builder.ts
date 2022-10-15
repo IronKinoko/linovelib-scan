@@ -19,9 +19,16 @@ class EpubBuilder {
 
   private progress: SyncProgress = {
     status: 'chapter',
-    chapters: 0,
-    assets: 0,
-    totalAssets: 0,
+    chapter: {
+      loaded: 0,
+      progress: 0,
+      total: 0,
+    },
+    asset: {
+      loaded: 0,
+      progress: 0,
+      total: 0,
+    },
   }
 
   constructor(private section: Section, private options: BuilderOptions = {}) {
@@ -57,6 +64,7 @@ class EpubBuilder {
         nextChapter: '',
       }
     })
+    this.progress.chapter.total = this.section.chapters.length
 
     do {
       await Promise.all(
@@ -73,7 +81,6 @@ class EpubBuilder {
 
           do {
             chapterInfo = await queryChapter(nextPageId)
-            this.updateProgress('chapter', nextPageId)
 
             chapter.content += chapterInfo.content
             nextPageId = chapterInfo.nextPage
@@ -85,6 +92,7 @@ class EpubBuilder {
           chapter.content = tryFixImg(chapter.content)
 
           chapter.done = true
+          this.updateProgress('chapter', chapter.id)
         })
       )
     } while (chapters.some((chapter) => !chapter.done))
@@ -102,7 +110,7 @@ class EpubBuilder {
       this.book.chapters.map(async (chapter) => {
         const $ = load(chapter.content, null, false)
 
-        this.progress.totalAssets += $('img').length
+        this.progress.asset.total += $('img').length
 
         const imageAssets = await Promise.all(
           $('img')
@@ -130,7 +138,7 @@ class EpubBuilder {
                   : console.error(error)
                 console.error(src, 'download error')
                 $(dom).remove()
-                this.progress.totalAssets--
+                this.progress.asset.total--
               }
 
               return ''
@@ -143,7 +151,7 @@ class EpubBuilder {
           .replace(new RegExp('”', 'gi'), '」')
           .replace(new RegExp('‘', 'gi'), '『')
           .replace(new RegExp('’', 'gi'), '』')
-          .replace(/(<\/.*?>)/g,'$1\n')
+          .replace(/(<\/.*?>)/g, '$1\n')
 
         return imageAssets.filter(Boolean)
       })
@@ -218,7 +226,7 @@ class EpubBuilder {
     archive.directory(this.bookRoot, false)
     await archive.finalize()
 
-    if(process.env.NODE_ENV !== 'development') await fs.remove(this.bookRoot)
+    if (process.env.NODE_ENV !== 'development') await fs.remove(this.bookRoot)
 
     this.updateProgress('done')
   }
@@ -228,11 +236,13 @@ class EpubBuilder {
     this.progress.id = id
     switch (status) {
       case 'chapter':
-        this.progress.chapters++
-
+        this.progress.chapter.loaded++
+        this.progress.chapter.progress =
+          this.progress.chapter.loaded / this.progress.chapter.total || 0
         break
       case 'asset':
-        this.progress.assets++
+        this.progress.asset.loaded++
+        this.progress.asset.progress = this.progress.asset.loaded / this.progress.asset.total || 0
         break
     }
 

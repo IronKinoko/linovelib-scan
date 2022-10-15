@@ -1,5 +1,5 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
-import { queryCatalog, genEpub, paths, SyncProgress } from '@ironkinoko/linovelib-scan'
+import { queryCatalog, genEpub, SyncProgress } from '@ironkinoko/linovelib-scan'
 import { cache } from 'utils/cache'
 
 type SyncResult = {
@@ -9,7 +9,19 @@ type SyncResult = {
   done?: boolean
 }
 
-const defaultProgress: SyncProgress = { assets: 0, chapters: 0, status: 'chapter', totalAssets: 0 }
+const defaultProgress: SyncProgress = {
+  status: 'chapter',
+  chapter: {
+    loaded: 0,
+    progress: 0,
+    total: 0,
+  },
+  asset: {
+    loaded: 0,
+    progress: 0,
+    total: 0,
+  },
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {

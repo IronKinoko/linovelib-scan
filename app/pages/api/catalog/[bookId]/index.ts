@@ -14,6 +14,8 @@ export async function cleanBookCache(catalog: Catalog) {
 
     const assetsPath = path.resolve(paths.assets, section.id)
     await fs.remove(assetsPath)
+
+    cache.del(section.id)
   }
 }
 

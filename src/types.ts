@@ -31,12 +31,16 @@ export interface Book {
   chapters: ChapterWithCotnent[]
 }
 
+export interface SyncProgressEvent {
+  total: number
+  loaded: number
+  progress: number
+}
 export interface SyncProgress {
   status: 'chapter' | 'asset' | 'done'
   id?: string
-  chapters: number
-  assets: number
-  totalAssets: number
+  chapter: SyncProgressEvent
+  asset: SyncProgressEvent
 }
 export interface BuilderOptions {
   onSync?: (progress: SyncProgress) => void

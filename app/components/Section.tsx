@@ -33,23 +33,28 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
         if (res.done) {
           setLoading(false)
           let progress: FetchProgress = {
-            status: 'done',
-            assets: 1,
-            chapters: 0,
-            totalAssets: 1,
-            downloadProgress: 0,
+            ...res.progress,
+            download: {
+              loaded: 0,
+              progress: 0,
+              total: 0,
+            },
           }
           setProgress(progress)
-          const res = await axios.get(`/api/catalog/${key}/download`, {
+          const downloadRes = await axios.get(`/api/catalog/${key}/download`, {
             responseType: 'blob',
             onDownloadProgress(p) {
-              progress.downloadProgress = p.progress
+              progress.download!.loaded = p.loaded
+              progress.download!.total = p.total!
+              progress.download!.progress = p.progress!
               setProgress({ ...progress })
             },
           })
           setTimeout(() => setProgress(undefined), 300)
-          const fileName = decodeURIComponent(res.headers['content-disposition']?.split('=').pop()!)
-          saveAs(res.data, fileName)
+          const fileName = decodeURIComponent(
+            downloadRes.headers['content-disposition']?.split('=').pop()!
+          )
+          saveAs(downloadRes.data, fileName)
         } else {
           setTimeout(fn, 300)
         }
