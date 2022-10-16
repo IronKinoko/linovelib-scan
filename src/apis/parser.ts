@@ -54,15 +54,6 @@ export function parseChapter(html: string) {
 
   const $content = $('#acontent')
 
-  ;(function removeUnsafeTag($content) {
-    $content.children().each((i, dom) => {
-      const $dom = $(dom)
-      if (dom.tagName.match(/^[a-z]+$/i) === null || dom.tagName.match(/br|script/i)) {
-        $dom.remove()
-      } else removeUnsafeTag($dom)
-    })
-  })($content)
-
   $content.find('.cgo').remove()
 
   let content = ($content.html() || '').trim().replace(/[\r\n]/gim, '')

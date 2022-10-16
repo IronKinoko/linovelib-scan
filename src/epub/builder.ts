@@ -7,7 +7,7 @@ import mustache from 'mustache'
 import path from 'path'
 import { queryAsset, queryChapter } from '../apis/api.js'
 import { paths } from '../constants/paths.js'
-import { Book, BuilderOptions, Section, SyncProgress } from '../types.js'
+import { Book, BuilderOptions, ChapterWithCotnent, Section, SyncProgress } from '../types.js'
 import { isURL } from '../utils.js'
 import { tryFixImg } from './tryFixImg.js'
 
@@ -47,12 +47,28 @@ class EpubBuilder {
     await this.genNCX()
     await this.genOPF()
     await this.genChapters()
+    await this.genCover()
     await this.output()
 
     return this.epubPath
   }
 
   private async queryBook(): Promise<Book> {
+    let chapters = await this.downloadChapters()
+    const imageAssets = await this.downloadAssets(chapters)
+    const cover = imageAssets[0]?.url
+
+    chapters = this.convertToXHTML(chapters)
+
+    return {
+      ...this.section,
+      chapters,
+      imageAssets,
+      cover,
+    }
+  }
+
+  private async downloadChapters(): Promise<ChapterWithCotnent[]> {
     const chapters = this.section.chapters.map((chapter, idx) => {
       return {
         ...chapter,
@@ -97,17 +113,14 @@ class EpubBuilder {
       )
     } while (chapters.some((chapter) => !chapter.done))
 
-    return {
-      ...this.section,
-      chapters,
-    }
+    return chapters
   }
 
-  private async downloadAssets() {
+  private async downloadAssets(chapters: ChapterWithCotnent[]) {
     const imageRoot = path.resolve(this.OEBPSRoot, 'Images')
 
     const imageAssets = await Promise.all(
-      this.book.chapters.map(async (chapter) => {
+      chapters.map(async (chapter) => {
         const $ = load(chapter.content, null, false)
 
         this.progress.asset.total += $('img').length
@@ -145,13 +158,6 @@ class EpubBuilder {
             })
         )
         chapter.content = $.html()
-          .replace(/<img(.*?)>/gi, '<img$1/>')
-          .replace(new RegExp('<br>', 'gi'), '')
-          .replace(new RegExp('“', 'gi'), '「')
-          .replace(new RegExp('”', 'gi'), '」')
-          .replace(new RegExp('‘', 'gi'), '『')
-          .replace(new RegExp('’', 'gi'), '』')
-          .replace(/(<\/.*?>)/g, '$1\n')
 
         return imageAssets.filter(Boolean)
       })
@@ -159,6 +165,47 @@ class EpubBuilder {
 
     return imageAssets.flat().map((url) => {
       return { url, type: mime.lookup(url) }
+    })
+  }
+
+  private convertToXHTML(chapters: ChapterWithCotnent[]) {
+    const attrWhiteList = ['src']
+
+    return chapters.map((chapter) => {
+      const $ = load(chapter.content)
+
+      ;(function removeUnsafeTag($content) {
+        $content.children().each((i, dom) => {
+          const $dom = $(dom)
+
+          const attr = $dom.attr()
+          if (attr) {
+            const nextAttr: Record<string, string | null> = attr
+            for (const key in nextAttr) {
+              if (Object.prototype.hasOwnProperty.call(nextAttr, key)) {
+                if (!attrWhiteList.includes(key)) nextAttr[key] = null
+              }
+            }
+            $dom.attr(nextAttr)
+          }
+
+          if (dom.tagName.match(/^[a-z]+$/i) === null || dom.tagName.match(/br|script/i)) {
+            $dom.remove()
+          } else removeUnsafeTag($dom)
+        })
+      })($('body'))
+
+      chapter.content = $('body')
+        .html()!
+        .replace(/<img(.*?)>/gi, '<img$1/>')
+        .replace(new RegExp('<br>', 'gi'), '')
+        .replace(new RegExp('“', 'gi'), '「')
+        .replace(new RegExp('”', 'gi'), '」')
+        .replace(new RegExp('‘', 'gi'), '『')
+        .replace(new RegExp('’', 'gi'), '』')
+        .replace(/(<\/.*?>)/g, '$1\n')
+
+      return chapter
     })
   }
 
@@ -175,13 +222,7 @@ class EpubBuilder {
     const filePath = path.resolve(this.OEBPSRoot, 'content.opf')
     let content = await fs.readFile(filePath, 'utf-8')
 
-    const imageAssets = await this.downloadAssets()
-    const cover = await this.genCover()
-    const xml = mustache.render(content, {
-      ...this.book,
-      cover,
-      imageAssets,
-    })
+    const xml = mustache.render(content, this.book)
 
     await fs.writeFile(filePath, xml)
   }
@@ -190,17 +231,9 @@ class EpubBuilder {
     const filePath = path.resolve(this.OEBPSRoot, 'Text', 'cover.xhtml')
     let content = await fs.readFile(filePath, 'utf-8')
 
-    let cover: string | undefined
-    for (const chapter of this.book.chapters) {
-      const $ = load(chapter.content)
-      cover = $('img').attr('src')
-      if (cover) break
-    }
-
-    const xml = mustache.render(content, { cover })
+    const xml = mustache.render(content, { cover: this.book.cover })
 
     await fs.writeFile(filePath, xml)
-    return cover?.replace('../Images/', '')
   }
 
   private async genChapters() {

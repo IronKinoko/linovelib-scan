@@ -29,6 +29,11 @@ export interface Book {
   title: string
   author: string
   chapters: ChapterWithCotnent[]
+  imageAssets: {
+    url: string
+    type: string | false
+  }[]
+  cover?: string
 }
 
 export interface SyncProgressEvent {
