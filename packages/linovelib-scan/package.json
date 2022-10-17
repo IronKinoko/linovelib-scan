@@ -1,12 +1,12 @@
 {
   "name": "@ironkinoko/linovelib-scan",
-  "version": "1.0.8",
+  "version": "1.0.9",
   "description": "download linovelib as epub",
   "scripts": {
     "dev": "nodemon -w src -e \"*\" -x ts-node-esm src/cli.ts 2923 第三卷",
-    "build": "rm -rf dist && tsc && cp -r src/epub/templates dist/epub/templates",
+    "build": "ts-node-esm scripts/build.ts",
     "epub":"NODE_ENV=development ts-node-esm src/cli.ts",
-    "release": "pnpm build && npm publish",
+    "release": "ts-node-esm scripts/release.ts",
     "test": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
     "test:coverage": "pnpm test -- --coverage"
   },
