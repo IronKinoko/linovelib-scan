@@ -10,6 +10,16 @@ export function useLocalBooks() {
     JSON.parse(window.localStorage.getItem(LOCALKEY) || '[]')
   )
 
+  useEffect(() => {
+    const listen = (e: StorageEvent) => {
+      if (e.key === LOCALKEY) mutate()
+    }
+    window.addEventListener('storage', listen)
+    return () => {
+      window.removeEventListener('storage', listen)
+    }
+  }, [])
+
   const putBook = useCallback(
     (book: LocalBook) => {
       const nextBooks = books.filter((o) => o.id !== book.id)
