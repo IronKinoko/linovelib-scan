@@ -8,7 +8,7 @@ export async function downloadLocalEpubFile(res: NextApiResponse, sectionTitle: 
   if (await fs.pathExists(epubPath)) {
     res.setHeader(
       'Content-Disposition',
-      'attachment; filename=' + encodeURIComponent(sectionTitle + '.epub')
+      `attachment; filename="${encodeURIComponent(sectionTitle + '.epub')}"`
     )
 
     const stat = await fs.stat(epubPath)

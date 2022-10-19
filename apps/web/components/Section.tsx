@@ -51,10 +51,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
             },
           })
           setTimeout(() => setProgress(undefined), 300)
-          const fileName = decodeURIComponent(
-            downloadRes.headers['content-disposition']?.split('=').pop()!
-          )
-          saveAs(downloadRes.data, fileName)
+          saveAs(downloadRes.data, section.title)
         } else {
           setTimeout(fn, 300)
         }
