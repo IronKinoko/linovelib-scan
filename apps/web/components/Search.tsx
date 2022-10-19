@@ -11,7 +11,7 @@ const Search = () => {
 
   useEffect(() => {
     if (document.body.clientWidth > 768) return
-    
+
     if (isFocus) document.body.style.overflow = 'hidden'
     else document.body.style.overflow = ''
     return () => {
@@ -54,21 +54,22 @@ const Search = () => {
         </div>
       </form>
 
-      {isFocus && (
-        <div className="overflow-auto z-10 fixed inset-0 top-14 bottom-0 md:absolute md:shadow-2xl md:dark:shadow-black md:inset-auto md:top-14 md:rounded-xl md:overflow-hidden md:w-64 bg-gray-100 dark:bg-slate-900 md:dark:bg-black text-slate-900 dark:text-slate-200">
-          {books.map((book) => (
-            <div
-              key={book.id}
-              className="border-b relative -bottom-[1px] px-4 py-4 cursor-pointer hover:text-sky-500"
-              onClick={() => {
-                router.replace({ query: { bookId: book.id } })
-              }}
-            >
-              {book.name}
-            </div>
-          ))}
-        </div>
-      )}
+      <div
+        className="overflow-auto z-10 fixed inset-0 top-14 bottom-0 md:absolute md:shadow-2xl md:dark:shadow-black md:inset-auto md:top-14 md:rounded-xl md:overflow-hidden md:w-64 bg-gray-100 dark:bg-slate-900 md:dark:bg-black text-slate-900 dark:text-slate-200"
+        hidden={!isFocus}
+      >
+        {books.map((book) => (
+          <div
+            key={book.id}
+            className="border-b relative last:border-b-0 px-4 py-4 cursor-pointer hover:text-sky-500"
+            onClick={() => {
+              router.replace({ query: { bookId: book.id } })
+            }}
+          >
+            {book.name}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
