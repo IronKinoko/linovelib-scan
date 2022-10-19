@@ -3,6 +3,7 @@ import useSWR from 'swr'
 import type { Catalog as ICatalog } from '@ironkinoko/linovelib-scan'
 import Section from './Section'
 import axios from 'axios'
+import { useLocalBooks } from 'hooks/useLocalBooks'
 type CatalogRes = {
   code: number
   message?: string
@@ -10,8 +11,17 @@ type CatalogRes = {
 }
 
 const Catalog: FC<{ bookId: string }> = ({ bookId }) => {
+  const [_, putBook] = useLocalBooks()
+
   const { data, isValidating, mutate } = useSWR<CatalogRes>(
-    bookId ? `/api/catalog/${bookId}` : null
+    bookId ? `/api/catalog/${bookId}` : null,
+    {
+      onSuccess(data) {
+        if (data.code === 0) {
+          putBook({ id: data.catalog.id, name: data.catalog.title })
+        }
+      },
+    }
   )
 
   if (!data || !bookId || data.code !== 0) {
