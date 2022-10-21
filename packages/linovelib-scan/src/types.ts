@@ -1,5 +1,6 @@
 export interface Catalog {
   id: string
+  cover: string
   title: string
   author: string
   sections: Section[]
@@ -11,6 +12,7 @@ export interface Section {
   sectionName: string
   author: string
   chapters: Chapter[]
+  defaultCover: string
 }
 export interface Chapter {
   title: string
@@ -30,7 +32,7 @@ export interface Book {
   author: string
   chapters: ChapterWithCotnent[]
   imageAssets: {
-    url: string
+    name: string
     type: string | false
   }[]
   cover?: string

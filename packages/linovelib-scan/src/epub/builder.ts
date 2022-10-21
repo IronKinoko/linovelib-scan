@@ -56,7 +56,7 @@ class EpubBuilder {
   private async queryBook(): Promise<Book> {
     let chapters = await this.downloadChapters()
     const imageAssets = await this.downloadAssets(chapters)
-    const cover = imageAssets[0]?.url
+    const cover = imageAssets[0]?.name
 
     chapters = this.convertToXHTML(chapters)
 
@@ -117,9 +117,7 @@ class EpubBuilder {
   }
 
   private async downloadAssets(chapters: ChapterWithCotnent[]) {
-    const imageRoot = path.resolve(this.OEBPSRoot, 'Images')
-
-    const imageAssets = await Promise.all(
+    const res = await Promise.all(
       chapters.map(async (chapter) => {
         const $ = load(chapter.content, null, false)
 
@@ -136,20 +134,13 @@ class EpubBuilder {
               }
 
               try {
-                const file = await queryAsset(this.section.id, src)
+                const file = await this.storeAsset(src)
                 this.updateProgress('asset', src)
 
-                const filePath = path.resolve(imageRoot, file.name)
                 $(dom).attr('src', `../Images/${file.name}`)
-
-                await fs.copy(file.path, filePath)
 
                 return file.name
               } catch (error) {
-                Axios.isAxiosError(error)
-                  ? console.error({ code: error.code, message: error.message })
-                  : console.error(error)
-                console.error(src, 'download error')
                 $(dom).remove()
                 this.progress.asset.total--
               }
@@ -163,9 +154,34 @@ class EpubBuilder {
       })
     )
 
-    return imageAssets.flat().map((url) => {
-      return { url, type: mime.lookup(url) }
+    const imageAssets = res.flat()
+
+    if (imageAssets.length === 0 && this.section.defaultCover) {
+      try {
+        const file = await this.storeAsset(this.section.defaultCover)
+        imageAssets.push(file.name)
+      } catch (error) {}
+    }
+    return imageAssets.map((name) => {
+      return { name, type: mime.lookup(name) }
     })
+  }
+
+  private async storeAsset(src: string) {
+    const imageRoot = path.resolve(this.OEBPSRoot, 'Images')
+    try {
+      const file = await queryAsset(this.section.id, src)
+      const filePath = path.resolve(imageRoot, file.name)
+      await fs.copy(file.path, filePath)
+      return file
+    } catch (error) {
+      Axios.isAxiosError(error)
+        ? console.error({ code: error.code, message: error.message })
+        : console.error(error)
+      console.error(src, 'download error')
+
+      throw error
+    }
   }
 
   private convertToXHTML(chapters: ChapterWithCotnent[]) {
@@ -233,7 +249,8 @@ class EpubBuilder {
 
     const xml = mustache.render(content, { cover: this.book.cover })
 
-    await fs.writeFile(filePath, xml)
+    if (this.book.cover) await fs.writeFile(filePath, xml)
+    else await fs.remove(filePath)
   }
 
   private async genChapters() {

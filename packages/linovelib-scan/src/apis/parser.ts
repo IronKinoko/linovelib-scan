@@ -8,6 +8,7 @@ export function parseCatalog(html: string) {
     throw new Error($('.aui-ver-form').text())
   }
 
+  const cover = $('[property=og:image]').attr('content') || ''
   const title = $('[property=og:novel:book_name]').attr('content') || ''
   const author = $('[property=og:novel:author]').attr('content') || ''
   const sections: Section[] = []
@@ -24,6 +25,7 @@ export function parseCatalog(html: string) {
         title: sectionTitle,
         sectionName: $dom.text(),
         author,
+        defaultCover: cover,
         chapters: [],
       }
       sections.push(currentSection)
@@ -43,6 +45,7 @@ export function parseCatalog(html: string) {
   })
 
   return {
+    cover,
     title,
     author,
     sections,

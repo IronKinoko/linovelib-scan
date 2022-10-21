@@ -6,25 +6,22 @@
     <dc:language>zh</dc:language>
     <dc:creator>IronKinoko</dc:creator>
     <dc:identifier id="BookId">{{id}}</dc:identifier>
-    <meta name="cover" content="{{{cover}}}" />
+    {{#cover}}<meta name="cover" content="{{{cover}}}" />{{/cover}}
   </metadata>
   <manifest>
     <item id="ncx" href="toc.ncx" media-type="application/x-dtbncx+xml" />
-    <item id="cover.xhtml" href="Text/cover.xhtml" media-type="application/xhtml+xml" />
+    {{#cover}}<item id="cover.xhtml" href="Text/cover.xhtml" media-type="application/xhtml+xml" />{{/cover}}
     {{#chapters}}
     <item id="{{fileName}}" href="Text/{{fileName}}" media-type="application/xhtml+xml" />
     {{/chapters}}
     {{#imageAssets}}
-    <item id="{{{url}}}" href="Images/{{{url}}}" media-type="{{{type}}}" />
+    <item id="{{{name}}}" href="Images/{{{name}}}" media-type="{{{type}}}" />
     {{/imageAssets}}
   </manifest>
   <spine toc="ncx">
-    <itemref idref="cover.xhtml" />
+    {{#cover}}<itemref idref="cover.xhtml" />{{/cover}}
     {{#chapters}}
     <itemref idref="{{fileName}}" />
     {{/chapters}}
   </spine>
-  <guide>
-    <reference type="cover" title="封面" href="Text/cover.xhtml"/>
-  </guide>
 </package>
