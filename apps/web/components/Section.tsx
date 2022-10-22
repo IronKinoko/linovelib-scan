@@ -12,7 +12,6 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   const handleSwitch = () => setOpen(!open)
 
   const key = `${bookId}/${section.id}`
-  const [loading, setLoading] = useState<boolean>(false)
   const [errorMessage, setErrorMessage] = useState('')
 
   const [progress, setProgress] = useState<FetchProgress>()
@@ -20,18 +19,14 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   const handleSync = (e: React.MouseEvent) => {
     e.stopPropagation()
     setErrorMessage('')
-    if (loading) return
     ;(async function fn() {
-      setLoading(true)
       const res: SyncResult = await axios.get(`/api/catalog/${key}/sync`).then((res) => res.data)
       setProgress(res.progress)
 
       if (res.code !== 0) {
         setErrorMessage(res.message)
-        setLoading(false)
       } else {
         if (res.done) {
-          setLoading(false)
           let progress: FetchProgress = {
             ...res.progress,
             download: {
@@ -50,6 +45,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
               setProgress({ ...progress })
             },
           })
+
           setTimeout(() => setProgress(undefined), 300)
           saveAs(downloadRes.data, section.title)
         } else {
@@ -68,8 +64,8 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
         <div className="flex justify-between items-center">
           <div className="text-slate-900 dark:text-slate-200">{section.sectionName}</div>
           <div className="shrink-0 ml-4 flex items-center space-x-2">
-            <button className="btn disabled:opacity-50" disabled={loading} onClick={handleSync}>
-              {loading ? '下载中...' : '下载'}
+            <button className="btn disabled:opacity-50" disabled={!!progress} onClick={handleSync}>
+              {!!progress ? '下载中...' : '下载'}
             </button>
           </div>
         </div>
