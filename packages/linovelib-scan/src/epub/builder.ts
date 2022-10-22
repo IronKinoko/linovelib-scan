@@ -205,7 +205,7 @@ class EpubBuilder {
             $dom.attr(nextAttr)
           }
 
-          if (dom.tagName.match(/^[a-z]+$/i) === null || dom.tagName.match(/br|script/i)) {
+          if (dom.tagName.match(/^[a-z]+$/i) === null || dom.tagName.match(/br|hr|script/i)) {
             $dom.remove()
           } else removeUnsafeTag($dom)
         })
