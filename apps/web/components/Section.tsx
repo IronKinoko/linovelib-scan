@@ -1,10 +1,15 @@
 import React, { FC, useState } from 'react'
-import type { Section as ISection } from '@ironkinoko/linovelib-scan'
+import type { Section as ISection, SyncProgress } from '@ironkinoko/linovelib-scan'
 import axios from 'axios'
-import { saveAs } from 'file-saver'
-import Progress, { FetchProgress } from './Progress'
+import Progress from './Progress'
 
-type SyncResult = { code: number; progress: FetchProgress; message: string; done: boolean }
+type SyncResult = {
+  code: number
+  progress: SyncProgress
+  message: string
+  done: boolean
+  downloadURL: string
+}
 
 const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section }) => {
   const [open, setOpen] = useState(false)
@@ -14,7 +19,7 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
   const key = `${bookId}/${section.id}`
   const [errorMessage, setErrorMessage] = useState('')
 
-  const [progress, setProgress] = useState<FetchProgress>()
+  const [progress, setProgress] = useState<SyncProgress>()
 
   const handleSync = (e: React.MouseEvent) => {
     e.stopPropagation()
@@ -27,27 +32,8 @@ const Section: FC<{ bookId: string; section: ISection }> = ({ bookId, section })
         setErrorMessage(res.message)
       } else {
         if (res.done) {
-          let progress: FetchProgress = {
-            ...res.progress,
-            download: {
-              loaded: 0,
-              progress: 0,
-              total: 0,
-            },
-          }
-          setProgress(progress)
-          const downloadRes = await axios.get(`/api/catalog/${key}/download`, {
-            responseType: 'blob',
-            onDownloadProgress(p) {
-              progress.download!.loaded = p.loaded
-              progress.download!.total = p.total!
-              progress.download!.progress = p.progress!
-              setProgress({ ...progress })
-            },
-          })
-
-          setTimeout(() => setProgress(undefined), 300)
-          saveAs(downloadRes.data, section.title)
+          window.location.href = res.downloadURL
+          setTimeout(() => setProgress(undefined), 100)
         } else {
           setTimeout(fn, 300)
         }

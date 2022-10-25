@@ -1,16 +1,12 @@
 import React, { FC } from 'react'
-import { SyncProgress, SyncProgressEvent } from '@ironkinoko/linovelib-scan'
+import { SyncProgress } from '@ironkinoko/linovelib-scan'
 
-export interface FetchProgress extends SyncProgress {
-  download?: SyncProgressEvent
-}
-
-const Progress: FC<{ progress?: FetchProgress }> = ({ progress }) => {
+const Progress: FC<{ progress?: SyncProgress }> = ({ progress }) => {
   if (!progress) return null
 
-  const { asset, chapter, download } = progress
+  const { asset, chapter } = progress
 
-  const width = ((chapter.progress + asset.progress + (download?.progress || 0)) * 100) / 3 + '%'
+  const width = ((chapter.progress + asset.progress) * 100) / 2 + '%'
 
   return (
     <div className="absolute inset-0 opacity-10">

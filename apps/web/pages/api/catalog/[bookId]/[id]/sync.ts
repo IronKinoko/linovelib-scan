@@ -7,6 +7,7 @@ type SyncResult = {
   progress?: SyncProgress
   message?: string
   done?: boolean
+  downloadURL?: string
 }
 
 const defaultProgress: SyncProgress = {
@@ -32,6 +33,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!section) throw new Error('Invalid section id')
 
+    const filename = `${encodeURIComponent(section.title)}.epub`
+    const downloadURL = `${process.env.basePath}/api/catalog/${bookId}/${id}/${filename}`
+
     if (cache.has(id)) {
       const result = cache.get<SyncResult>(id)!
       if (result.code !== 0 || result.done) cache.del(id)
@@ -40,7 +44,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       cache.set<SyncResult>(id, { code: 0, progress: defaultProgress, done: false })
       genEpub(section, {
         onSync: (progress) =>
-          cache.set(id, { code: 0, progress, done: progress.status === 'done' }),
+          cache.set(id, { code: 0, progress, done: progress.status === 'done', downloadURL }),
       }).catch((error) => {
         console.error(error)
         cache.set(id, { code: 1, message: error.message })

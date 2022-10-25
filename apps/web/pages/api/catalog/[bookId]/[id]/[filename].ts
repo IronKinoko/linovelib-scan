@@ -6,11 +6,6 @@ import fs from 'fs-extra'
 export async function downloadLocalEpubFile(res: NextApiResponse, sectionTitle: string) {
   const epubPath = path.resolve(paths.epubs, sectionTitle + '.epub')
   if (await fs.pathExists(epubPath)) {
-    res.setHeader(
-      'Content-Disposition',
-      `attachment; filename="${encodeURIComponent(sectionTitle + '.epub')}"`
-    )
-
     const stat = await fs.stat(epubPath)
     res.setHeader('Content-Length', stat.size)
     res.setHeader('Content-Type', 'application/epub+zip')
