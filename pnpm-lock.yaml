@@ -8,14 +8,12 @@ importers:
   apps/web:
     specifiers:
       '@ironkinoko/linovelib-scan': workspace:*
-      '@types/file-saver': ^2.0.5
       '@types/fs-extra': ^9.0.13
       '@types/node': 18.8.4
       '@types/react': 18.0.21
       '@types/react-dom': 18.0.6
       autoprefixer: ^10.4.12
       axios: ^1.1.2
-      file-saver: ^2.0.5
       fs-extra: ^10.1.0
       next: 12.3.1
       next-transpile-modules: ^9.1.0
@@ -29,7 +27,6 @@ importers:
     dependencies:
       '@ironkinoko/linovelib-scan': link:../../packages/linovelib-scan
       axios: 1.1.2
-      file-saver: 2.0.5
       fs-extra: 10.1.0
       next: 12.3.1_biqbaboplfbrettd7655fr4n2y
       node-cache: 5.1.2
@@ -37,7 +34,6 @@ importers:
       react-dom: 18.2.0_react@18.2.0
       swr: 1.3.0_react@18.2.0
     devDependencies:
-      '@types/file-saver': 2.0.5
       '@types/fs-extra': 9.0.13
       '@types/node': 18.8.4
       '@types/react': 18.0.21
@@ -929,10 +925,6 @@ packages:
       '@babel/types': 7.19.4
     dev: true
 
-  /@types/file-saver/2.0.5:
-    resolution: {integrity: sha512-zv9kNf3keYegP5oThGLaPk8E081DFDuwfqjtiTzm6PoxChdJ1raSuADf2YGCVIyrSynLrgc8JWv296s7Q7pQSQ==}
-    dev: true
-
   /@types/fs-extra/9.0.13:
     resolution: {integrity: sha512-nEnwB++1u5lVDM2UI4c1+5R+FYaKfaAzS4OococimjVm3nQw3TuzH5UNsocrcTBbhnerblyHj4A49qXbIiZdpA==}
     dependencies:
@@ -1775,10 +1767,6 @@ packages:
     dependencies:
       bser: 2.1.1
     dev: true
-
-  /file-saver/2.0.5:
-    resolution: {integrity: sha512-P9bmyZ3h/PRG+Nzga+rbdI4OEpNDzAVyy74uVO9ATgzLK6VtAsYybF/+TOCvrc0MO793d6+42lLyZTw7/ArVzA==}
-    dev: false
 
   /fill-range/7.0.1:
     resolution: {integrity: sha512-qOo9F+dMUmC2Lcb4BbVvnKJxTPjCm+RRpe4gDuGrzkL7mEVl/djYSu2OdQ2Pa302N4oqkSg9ir6jaLWJ2USVpQ==}
