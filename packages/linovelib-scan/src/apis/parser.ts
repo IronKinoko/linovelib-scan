@@ -1,6 +1,7 @@
 import { load } from 'cheerio'
 import { Section } from '../types.js'
-import { md5 } from '../utils.js'
+import { md5, sectionNameToNumber } from '../utils.js'
+
 export function parseCatalog(html: string) {
   const $ = load(html)
 
@@ -14,20 +15,23 @@ export function parseCatalog(html: string) {
   const sections: Section[] = []
 
   let currentSection: Section
-
-  $('#volumes li').each((i, dom) => {
+  let id = 0
+  $('#volumes li').each((_, dom) => {
     const $dom = $(dom)
 
     if ($dom.hasClass('chapter-bar')) {
-      const sectionTitle = `${title} ${$dom.text()}`
+      const sectionName = $dom.text()
+      const sectionTitle = `${title} ${sectionNameToNumber(sectionName)}`
       currentSection = {
-        id: md5(sectionTitle + i),
+        id: id.toString(),
+        hash: md5(sectionTitle + id),
         title: sectionTitle,
-        sectionName: $dom.text(),
+        sectionName,
         author,
         defaultCover: cover,
         chapters: [],
       }
+      id++
       sections.push(currentSection)
     } else {
       const href = $dom.find('a').attr('href') || ''

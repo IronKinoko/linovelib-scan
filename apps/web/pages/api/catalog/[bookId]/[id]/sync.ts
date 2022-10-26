@@ -33,21 +33,23 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
 
     if (!section) throw new Error('Invalid section id')
 
+    const hash = section.hash
+
     const filename = `${encodeURIComponent(section.title)}.epub`
     const downloadURL = `${process.env.basePath}/api/catalog/${bookId}/${id}/${filename}`
 
-    if (cache.has(id)) {
-      const result = cache.get<SyncResult>(id)!
-      if (result.code !== 0 || result.done) cache.del(id)
+    if (cache.has(hash)) {
+      const result = cache.get<SyncResult>(hash)!
+      if (result.code !== 0 || result.done) cache.del(hash)
       return res.json(result)
     } else {
-      cache.set<SyncResult>(id, { code: 0, progress: defaultProgress, done: false })
+      cache.set<SyncResult>(hash, { code: 0, progress: defaultProgress, done: false })
       genEpub(section, {
         onSync: (progress) =>
-          cache.set(id, { code: 0, progress, done: progress.status === 'done', downloadURL }),
+          cache.set(hash, { code: 0, progress, done: progress.status === 'done', downloadURL }),
       }).catch((error) => {
         console.error(error)
-        cache.set(id, { code: 1, message: error.message })
+        cache.set(hash, { code: 1, message: error.message })
       })
     }
 

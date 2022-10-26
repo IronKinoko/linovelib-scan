@@ -170,7 +170,7 @@ class EpubBuilder {
   private async storeAsset(src: string) {
     const imageRoot = path.resolve(this.OEBPSRoot, 'Images')
     try {
-      const file = await queryAsset(this.section.id, src)
+      const file = await queryAsset(this.section.hash, src)
       const filePath = path.resolve(imageRoot, file.name)
       await fs.copy(file.path, filePath)
       return file

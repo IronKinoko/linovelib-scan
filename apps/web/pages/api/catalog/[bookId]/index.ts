@@ -12,10 +12,10 @@ export async function cleanBookCache(catalog: Catalog) {
     const epubPath = path.resolve(paths.epubs, section.title + '.epub')
     await fs.remove(epubPath)
 
-    const assetsPath = path.resolve(paths.assets, section.id)
+    const assetsPath = path.resolve(paths.assets, section.hash)
     await fs.remove(assetsPath)
 
-    cache.del(section.id)
+    cache.del(section.hash)
   }
 }
 

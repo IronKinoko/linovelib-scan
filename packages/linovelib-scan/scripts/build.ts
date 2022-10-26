@@ -8,7 +8,7 @@ function exec(cmd: string) {
 }
 
 fs.removeSync('dist')
-exec('tsc')
+exec('tsc -p tsconfig.build.json')
 fs.copySync(
   path.resolve(process.cwd(), 'src', 'epub', 'templates'),
   path.resolve(process.cwd(), 'dist', 'epub', 'templates')

@@ -8,6 +8,7 @@ export interface Catalog {
 
 export interface Section {
   id: string
+  hash: string
   title: string
   sectionName: string
   author: string
