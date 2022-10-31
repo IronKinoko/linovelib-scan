@@ -27,10 +27,12 @@ const defaultProgress: SyncProgress = {
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   try {
     const { bookId, id } = req.query as Record<string, string>
+    
     const catalog = await queryCatalog(bookId)
+    const cacheKey = `bookId:${bookId}`
+    cache.set(cacheKey, catalog)
 
     const section = catalog.sections.find((section) => section.id === id)
-
     if (!section) throw new Error('Invalid section id')
 
     const hash = section.hash
@@ -38,18 +40,20 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const filename = `${encodeURIComponent(section.title)}.epub`
     const downloadURL = `${process.env.basePath}/api/catalog/${bookId}/${id}/${filename}`
 
+    const updateSyncInfo = (result: SyncResult) => cache.set(hash, result, 60)
+
     if (cache.has(hash)) {
       const result = cache.get<SyncResult>(hash)!
       if (result.code !== 0 || result.done) cache.del(hash)
       return res.json(result)
     } else {
-      cache.set<SyncResult>(hash, { code: 0, progress: defaultProgress, done: false })
+      updateSyncInfo({ code: 0, progress: defaultProgress, done: false })
       genEpub(section, {
         onSync: (progress) =>
-          cache.set(hash, { code: 0, progress, done: progress.status === 'done', downloadURL }),
+          updateSyncInfo({ code: 0, progress, done: progress.status === 'done', downloadURL }),
       }).catch((error) => {
         console.error(error)
-        cache.set(hash, { code: 1, message: error.message })
+        updateSyncInfo({ code: 1, message: error.message })
       })
     }
 
