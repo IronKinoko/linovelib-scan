@@ -12,7 +12,7 @@
     "@ironkinoko/linovelib-scan": "workspace:*",
     "axios": "^1.1.2",
     "fs-extra": "^10.1.0",
-    "next": "12.3.1",
+    "next": "13.0.0",
     "node-cache": "^5.1.2",
     "react": "18.2.0",
     "react-dom": "18.2.0",
