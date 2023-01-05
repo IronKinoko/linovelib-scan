@@ -8,8 +8,8 @@ import { parseCatalog, parseChapter } from './parser.js'
 import http from 'http'
 import https from 'https'
 export const axios = Axios.create({
-  httpAgent: new http.Agent({ keepAlive: true, maxSockets: 10 }),
-  httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 10 }),
+  httpAgent: new http.Agent({ maxSockets: 10 }),
+  httpsAgent: new https.Agent({ maxSockets: 10 }),
   baseURL: 'https://w.linovelib.com',
   headers: {
     'User-Agent':
