@@ -12,10 +12,8 @@ export const axios = Axios.create({
   httpsAgent: new https.Agent({ keepAlive: true, maxSockets: 10 }),
   baseURL: 'https://w.linovelib.com',
   headers: {
-    common: {
-      'User-Agent':
-        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
-    },
+    'User-Agent':
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/106.0.0.0 Safari/537.36',
   },
 })
 

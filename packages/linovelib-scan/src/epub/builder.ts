@@ -10,6 +10,7 @@ import { paths } from '../constants/paths.js'
 import { Book, BuilderOptions, ChapterWithCotnent, Section, SyncProgress } from '../types.js'
 import { isURL } from '../utils.js'
 import { tryFixImg } from './tryFixImg.js'
+import prettier from 'prettier'
 
 class EpubBuilder {
   private bookRoot: string
@@ -205,7 +206,7 @@ class EpubBuilder {
             $dom.attr(nextAttr)
           }
 
-          if (dom.tagName.match(/^[a-z]+$/i) === null || dom.tagName.match(/br|hr|script/i)) {
+          if (dom.tagName.match(/^[a-z]+$/i) === null || dom.tagName.match(/script/i)) {
             $dom.remove()
           } else removeUnsafeTag($dom)
         })
@@ -213,13 +214,12 @@ class EpubBuilder {
 
       chapter.content = $('body')
         .html()!
-        .replace(/<img(.*?)>/gi, '<img$1/>')
-        .replace(new RegExp('<br>', 'gi'), '')
         .replace(new RegExp('“', 'gi'), '「')
         .replace(new RegExp('”', 'gi'), '」')
         .replace(new RegExp('‘', 'gi'), '『')
         .replace(new RegExp('’', 'gi'), '』')
-        .replace(/(<\/.*?>)/g, '$1\n')
+
+      chapter.content = prettier.format(chapter.content, { parser: 'html' })
 
       return chapter
     })

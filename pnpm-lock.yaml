@@ -60,6 +60,7 @@ importers:
       mime-types: ^2.1.35
       mustache: ^4.2.0
       nodemon: ^2.0.20
+      prettier: ^2.8.1
       ts-jest: ^29.0.3
       ts-node: ^10.9.1
       typescript: ^4.8.4
@@ -70,6 +71,7 @@ importers:
       fs-extra: 10.1.0
       mime-types: 2.1.35
       mustache: 4.2.0
+      prettier: 2.8.1
     devDependencies:
       '@types/archiver': 5.3.1
       '@types/fs-extra': 9.0.13
@@ -2961,6 +2963,12 @@ packages:
       picocolors: 1.0.0
       source-map-js: 1.0.2
     dev: true
+
+  /prettier/2.8.1:
+    resolution: {integrity: sha512-lqGoSJBQNJidqCHE80vqZJHWHRFoNYsSpP9AjFhlhi9ODCJA541svILes/+/1GM3VaL/abZi7cpFzOpdR9UPKg==}
+    engines: {node: '>=10.13.0'}
+    hasBin: true
+    dev: false
 
   /pretty-format/29.2.1:
     resolution: {integrity: sha512-Y41Sa4aLCtKAXvwuIpTvcFBkyeYp2gdFWzXGA+ZNES3VwURIB165XO/z7CjETwzCCS53MjW/rLMyyqEnTtaOfA==}
