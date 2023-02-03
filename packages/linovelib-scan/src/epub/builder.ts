@@ -211,6 +211,8 @@ class EpubBuilder {
           } else removeUnsafeTag($dom)
         })
       })($('body'))
+      
+      $('p + br').remove()
 
       chapter.content = $('body')
         .html()!
